@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { siteConfig } from './site-config';
 import { GraphCanvas } from './components/GraphCanvas';
 import { FramePlayer } from './components/FramePlayer';
@@ -12,6 +12,7 @@ export function App() {
         <Capabilities />
         <Hypergraph />
         <AiEditor />
+        <Architecture />
         <Install />
         <McpConfig />
         <Footer />
@@ -23,16 +24,35 @@ export function App() {
 // ── Nav ─────────────────────────────────────────────────────
 
 function Nav() {
+  const [open, setOpen] = useState(false);
+  const close = useCallback(() => setOpen(false), []);
+
+  // 点击菜单链接后关闭
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
+  }, [open]);
+
   return (
     <nav className="nav-bar">
       <div className="nav-inner">
         <span className="nav-logo">Comdr</span>
-        <div className="nav-links">
-          <a href="#hypergraph">超图</a>
-          <a href="#ai-editor">AI 编辑器</a>
-          <a href="#install">安装</a>
+        <div className={`nav-links ${open ? 'nav-open' : ''}`}>
+          <a href="#hypergraph" onClick={close}>超图</a>
+          <a href="#ai-editor" onClick={close}>AI 编辑器</a>
+          <a href="#architecture" onClick={close}>架构</a>
+          <a href="#install" onClick={close}>安装</a>
         </div>
         <a className="nav-cta" href="#install">安装</a>
+        <button
+          className={`hamburger ${open ? 'ham-active' : ''}`}
+          onClick={() => setOpen(o => !o)}
+          aria-label="菜单"
+        >
+          <span /><span /><span />
+        </button>
       </div>
     </nav>
   );
@@ -162,6 +182,30 @@ function AiEditor() {
       </div>
 
       <FramePlayer />
+    </section>
+  );
+}
+
+// ── Architecture ─────────────────────────────────────────────
+
+function Architecture() {
+  return (
+    <section className="architecture-section" id="architecture">
+      <div className="section-head">
+        <h2>架构 — 六包协同</h2>
+        <p className="section-sub">
+          每个包职责单一、边界清晰。从共享类型到桌面面板，全链路覆盖。
+        </p>
+      </div>
+
+      <div className="arch-grid">
+        {siteConfig.architecture.packages.map((pkg) => (
+          <div key={pkg.name} className="arch-card">
+            <h4 className="arch-name">{pkg.name}</h4>
+            <p className="arch-desc">{pkg.desc}</p>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

@@ -32,7 +32,7 @@ export const siteConfig: SiteConfig = {
   phase: 'alpha',
 
   tagline: '意念开发',
-  description: '语言驱动引擎，创意即刻成型。Comdr，专属编程指挥官',
+  description: '语言驱动引擎，创意即刻成型。',
 
   installSteps: [
     {

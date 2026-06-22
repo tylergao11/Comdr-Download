@@ -754,6 +754,68 @@ section[id] { scroll-margin-top: 68px; }
 }
 .mcp-tag a:hover { color: var(--accent); }
 
+/* ── Architecture ──────────────────────────────────────────── */
+
+.architecture-section { padding-top: 80px; }
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.arch-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  transition: border-color 0.25s;
+}
+.arch-card:hover { border-color: var(--border-glow); }
+
+.arch-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+
+.arch-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+/* ── Hamburger ─────────────────────────────────────────────── */
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 110;
+}
+.hamburger span {
+  display: block;
+  width: 22px; height: 2px;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.2s;
+}
+.hamburger.ham-active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.ham-active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.ham-active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 /* ── Footer ───────────────────────────────────────────────── */
 
 .footer {
@@ -774,6 +836,7 @@ section[id] { scroll-margin-top: 68px; }
 @media (max-width: 1024px) {
   .bento { grid-template-columns: 1fr; }
   .bento-bullets { grid-template-columns: 1fr; }
+  .arch-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -783,8 +846,34 @@ section[id] { scroll-margin-top: 68px; }
   .hero-tagline { font-size: 38px; letter-spacing: -0.8px; }
   .hero-desc { font-size: 16px; }
   .hero-actions { flex-direction: column; }
-  .nav-links { display: none; }
+
+  /* 汉堡菜单 */
+  .hamburger { display: flex; }
+  .nav-links {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    background: rgba(11,10,9,0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 105;
+  }
+  .nav-links.nav-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-links a { font-size: 20px; }
+  .nav-cta { display: none; }
+
   .bento { grid-template-columns: 1fr; }
+  .arch-grid { grid-template-columns: 1fr 1fr; }
   .section-head { margin-bottom: 36px; }
   h2 { font-size: 26px; }
   .graph-canvas { aspect-ratio: 4/3; }
