@@ -81,7 +81,7 @@ export const siteConfig: SiteConfig = {
     { name: "view", desc: "桌面星图、事件时间线、Token 与反馈面板。" },
   ],
   links: {
-    github: "https://github.com/ncuh/Comdr",
-    docsRepo: "https://github.com/ncuh/Comdr#readme",
+    github: "https://github.com/tylergao11/Comdr",
+    docsRepo: "https://github.com/tylergao11/Comdr#readme",
   },
 };
