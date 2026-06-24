@@ -4,7 +4,7 @@
 // v2: 打字减速 · 永久暂停 · dot 加大发光 · 色值分离
 // ============================================================
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Frame { title: string; lines: string[] }
 
@@ -103,7 +103,6 @@ export function FramePlayer() {
   const [displayedLines, setDisplayedLines] = useState<string[]>([]);
   const [lineCursor, setLineCursor] = useState(0);
   const [paused, setPaused] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 逐行打字 — 80~160ms，空行 40ms
   useEffect(() => {
@@ -123,14 +122,15 @@ export function FramePlayer() {
     setLineCursor(0);
   }, [frameIdx]);
 
-  // 自动轮播（暂停时停止）
+  // 打字完成后等待，再自动翻页（暂停时停止）
+  const typingDone = lineCursor >= FRAMES[frameIdx].lines.length;
   useEffect(() => {
-    if (paused) return;
-    timerRef.current = setInterval(() => {
+    if (!typingDone || paused) return;
+    const t = setTimeout(() => {
       setFrameIdx(prev => (prev + 1) % FRAMES.length);
     }, FRAME_INTERVAL);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [paused]);
+    return () => clearTimeout(t);
+  }, [typingDone, paused, frameIdx]);
 
   // 手动翻页 → 永久暂停
   const goTo = useCallback((i: number) => {

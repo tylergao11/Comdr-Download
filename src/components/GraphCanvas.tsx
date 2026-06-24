@@ -11,28 +11,46 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 interface StarNode { id:string; kind:'document'|'script'|'node'|'method'|'asset'; label:string; x:number; y:number }
 interface Link { from:string; to:string; kind:'belongsTo'|'calls'|'triggers'|'refs'|'imports' }
 
+// 射击游戏项目数据 — 与 FramePlayer 叙事一致
 const NODES: StarNode[]=[
-  {id:'d1',kind:'document',label:'MainScene', x:.50,y:.14},{id:'d2',kind:'document',label:'Player', x:.17,y:.42},
-  {id:'d3',kind:'document',label:'Ball', x:.83,y:.42},{id:'s1',kind:'script',label:'GameMgr', x:.45,y:.28},
-  {id:'s2',kind:'script',label:'PlayerCtrl',x:.13,y:.25},{id:'s3',kind:'script',label:'BallPhys',x:.87,y:.25},
-  {id:'s4',kind:'script',label:'Bumper',x:.73,y:.58},{id:'m1',kind:'method',label:'startGame',x:.38,y:.38},
-  {id:'m2',kind:'method',label:'onBallLost',x:.49,y:.48},{id:'m3',kind:'method',label:'movePdl',x:.11,y:.35},
-  {id:'m4',kind:'method',label:'applyBnc',x:.89,y:.34},{id:'m5',kind:'method',label:'onHit',x:.75,y:.49},
-  {id:'n1',kind:'node',label:'Board',x:.46,y:.58},{id:'n2',kind:'node',label:'PlayerSpr',x:.19,y:.56},
-  {id:'n3',kind:'node',label:'Ball',x:.79,y:.68},{id:'n4',kind:'node',label:'Bumper_01',x:.91,y:.76},
-  {id:'a1',kind:'asset',label:'ball.png',x:.93,y:.85},{id:'a2',kind:'asset',label:'glow.png',x:.69,y:.87},
+  // documents — 场景/Prefab
+  {id:'d1',kind:'document',label:'Level_01',     x:.48,y:.10},{id:'d2',kind:'document',label:'Player',       x:.18,y:.16},
+  {id:'d3',kind:'document',label:'Enemy',        x:.80,y:.16},
+  // scripts
+  {id:'s1',kind:'script',  label:'GameManager',  x:.48,y:.28},{id:'s2',kind:'script',  label:'PlayerCtrl',   x:.16,y:.30},
+  {id:'s3',kind:'script',  label:'EnemyAI',      x:.82,y:.30},{id:'s4',kind:'script',  label:'BulletPhys',   x:.34,y:.40},
+  {id:'s5',kind:'script',  label:'BossCtrl',     x:.72,y:.38},
+  // methods
+  {id:'m1',kind:'method',  label:'startGame',    x:.44,y:.44},{id:'m2',kind:'method',  label:'spawnWave',    x:.56,y:.46},
+  {id:'m3',kind:'method',  label:'fireBullet',   x:.12,y:.48},{id:'m4',kind:'method',  label:'onHit',        x:.82,y:.50},
+  {id:'m5',kind:'method',  label:'onBossPhase',  x:.68,y:.54},
+  // nodes — 场景内实例
+  {id:'n1',kind:'node',    label:'Player_Sprite',x:.20,y:.64},{id:'n2',kind:'node',    label:'SpawnPoint_01',x:.48,y:.62},
+  {id:'n3',kind:'node',    label:'Boss_Entrance',x:.78,y:.66},{id:'n4',kind:'node',    label:'HP_Bar',       x:.60,y:.70},
+  // assets
+  {id:'a1',kind:'asset',   label:'fighter.png',  x:.22,y:.80},{id:'a2',kind:'asset',   label:'enemy.png',    x:.80,y:.78},
+  {id:'a3',kind:'asset',   label:'bullet.png',   x:.38,y:.84},{id:'a4',kind:'asset',   label:'boss_sheet.png',x:.74,y:.84},
 ];
 
 const EDGES: Link[]=[
+  // belongsTo — 脚本/方法/节点 → 所属文档/脚本
   {from:'s1',to:'d1',kind:'belongsTo'},{from:'s2',to:'d2',kind:'belongsTo'},{from:'s3',to:'d3',kind:'belongsTo'},
+  {from:'s4',to:'d2',kind:'belongsTo'},{from:'s5',to:'d1',kind:'belongsTo'},
   {from:'m1',to:'s1',kind:'belongsTo'},{from:'m2',to:'s1',kind:'belongsTo'},{from:'m3',to:'s2',kind:'belongsTo'},
-  {from:'m4',to:'s3',kind:'belongsTo'},{from:'m5',to:'s4',kind:'belongsTo'},{from:'n1',to:'d1',kind:'belongsTo'},
-  {from:'n2',to:'d2',kind:'belongsTo'},{from:'n3',to:'d3',kind:'belongsTo'},
-  {from:'m1',to:'m3',kind:'calls'},{from:'m2',to:'m1',kind:'calls'},{from:'m4',to:'m5',kind:'calls'},
-  {from:'m3',to:'m5',kind:'triggers'},{from:'m5',to:'m2',kind:'triggers'},
-  {from:'m1',to:'n1',kind:'refs'},{from:'m3',to:'n2',kind:'refs'},{from:'m4',to:'n3',kind:'refs'},{from:'m5',to:'n4',kind:'refs'},
-  {from:'m4',to:'a1',kind:'refs'},{from:'m5',to:'a2',kind:'refs'},{from:'s2',to:'d3',kind:'refs'},{from:'s3',to:'a1',kind:'refs'},
-  {from:'s1',to:'s2',kind:'imports'},{from:'s1',to:'s3',kind:'imports'},{from:'s2',to:'s3',kind:'imports'},{from:'s3',to:'s4',kind:'imports'},
+  {from:'m4',to:'s3',kind:'belongsTo'},{from:'m5',to:'s5',kind:'belongsTo'},
+  {from:'n1',to:'d2',kind:'belongsTo'},{from:'n2',to:'d1',kind:'belongsTo'},{from:'n3',to:'d1',kind:'belongsTo'},{from:'n4',to:'d1',kind:'belongsTo'},
+  // calls — 方法间调用
+  {from:'m1',to:'m2',kind:'calls'},{from:'m2',to:'m3',kind:'calls'},{from:'m3',to:'m4',kind:'calls'},
+  {from:'m2',to:'m5',kind:'calls'},{from:'m5',to:'m2',kind:'calls'},
+  // triggers — 事件触发
+  {from:'m4',to:'m2',kind:'triggers'},{from:'m5',to:'m1',kind:'triggers'},
+  // refs — 方法/脚本引用节点或资源
+  {from:'m3',to:'n1',kind:'refs'},{from:'m2',to:'n2',kind:'refs'},{from:'m5',to:'n3',kind:'refs'},{from:'m4',to:'n4',kind:'refs'},
+  {from:'m3',to:'a1',kind:'refs'},{from:'m4',to:'a2',kind:'refs'},{from:'m3',to:'a3',kind:'refs'},{from:'m5',to:'a4',kind:'refs'},
+  {from:'s3',to:'a2',kind:'refs'},{from:'s2',to:'a3',kind:'refs'},
+  // imports — 脚本间导入
+  {from:'s1',to:'s2',kind:'imports'},{from:'s1',to:'s3',kind:'imports'},{from:'s1',to:'s5',kind:'imports'},
+  {from:'s2',to:'s4',kind:'imports'},{from:'s3',to:'s4',kind:'imports'},
 ];
 
 // ── Overlay 精确常量 ─────────────────────────────────────────
