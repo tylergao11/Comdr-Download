@@ -22,7 +22,7 @@ export function App() {
       <main className="site">
         <Hero />
         <Reveal><CapabilityBand /></Reveal>
-        <Reveal><ScenarioPills /></Reveal>
+
         <Reveal><DevFlowSection /></Reveal>
         <Reveal><SafetySection /></Reveal>
         <Reveal><InstallSection /></Reveal>
@@ -92,19 +92,6 @@ function CapabilityBand() {
         ))}
       </div>
     </section>
-  );
-}
-
-function ScenarioPills() {
-  return (
-    <div className="scenario-pills">
-      <span className="scenario-pills__label">全自动开发工作流</span>
-      <div className="scenario-pills__row">
-        <span>自然语言输入，Cocos 编辑器中即时落地</span>
-        <span>星图自动检索上下文，补齐组件依赖</span>
-        <span>每一步快照可回滚，全链路可审计</span>
-      </div>
-    </div>
   );
 }
 
