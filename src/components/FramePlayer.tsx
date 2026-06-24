@@ -1,186 +1,295 @@
-// ============================================================
-// FramePlayer — Commander 执行过程帧动画回放
-// 终端风格，逐行打字 · 手动翻页暂停 · 手动恢复自动播放
-// v2: 打字减速 · 永久暂停 · dot 加大发光 · 色值分离
-// ============================================================
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { useState, useEffect, useCallback } from 'react';
+type FlowKind = "request" | "graph" | "compile" | "write" | "audit";
 
-interface Frame { title: string; lines: string[] }
+interface FrameNode {
+  label: string;
+  kind: FlowKind;
+}
+
+interface FrameLink {
+  from: number;
+  to: number;
+  kind: string;
+}
+
+interface Frame {
+  title: string;
+  eyebrow: string;
+  summary: string;
+  lines: string[];
+  nodes: FrameNode[];
+  links: FrameLink[];
+}
+
+const SLOTS = [
+  { x: 50, y: 13 },
+  { x: 18, y: 34 },
+  { x: 82, y: 35 },
+  { x: 28, y: 76 },
+  { x: 72, y: 76 },
+];
 
 const FRAMES: Frame[] = [
   {
-    title: '需求',
+    title: "需求输入",
+    eyebrow: "01 / request",
+    summary: "用户给出游戏开发目标，Comdr 建立可执行意图。",
     lines: [
-      '用户提出需求：',
-      '',
-      '> 我想做一款竖屏射击游戏，',
-      '> 玩家控制战机，躲避敌机弹幕，',
-      '> 击杀 Boss 过关',
-      '',
-      'Coding Agent 分析需求，拆解为具体任务。',
-      'Comdr 作为执行层，接收每条指令，',
-      '在编辑器中精准完成。',
+      "> user: 创建 Boss 入场、血条和弹幕阶段",
+      "intent.parse -> gameplay.workflow",
+      "scope.pin -> scene: Level_01",
+      "guard.enable -> snapshot before write",
+    ],
+    nodes: [
+      { label: "User", kind: "request" },
+      { label: "Intent", kind: "request" },
+      { label: "Level_01", kind: "graph" },
+      { label: "Snapshot", kind: "audit" },
+      { label: "Plan", kind: "compile" },
+    ],
+    links: [
+      { from: 0, to: 1, kind: "parse" },
+      { from: 1, to: 2, kind: "pin" },
+      { from: 1, to: 4, kind: "plan" },
+      { from: 4, to: 3, kind: "guard" },
     ],
   },
   {
-    title: '拆解',
+    title: "星图检索",
+    eyebrow: "02 / retrieve",
+    summary: "从项目星图里拉取脚本、节点、资源和方法调用关系。",
     lines: [
-      'Coding Agent 拆解出 5 项任务：',
-      '',
-      '  ① 创建 Player 战机 Prefab',
-      '     └─ 挂载碰撞体 + 武器脚本',
-      '  ② 创建 Enemy 敌机 Prefab',
-      '     └─ 含血条 UI + 掉落逻辑',
-      '  ③ 创建 Bullet 预制体 ×2',
-      '     └─ 玩家子弹 / 敌人子弹',
-      '  ④ 搭建关卡场景 Level_01',
-      '     └─ 背景层 + 生成点 + Boss',
-      '  ⑤ 接入 GameManager 脚本',
-      '',
-      '逐条进入 Comdr 执行。',
+      "comdr.retrieve(\"Level_01\", \"BossCtrl\", \"boss_sheet\")",
+      "[graph] 11 nodes / 15 relations highlighted",
+      "[asset] boss_sheet.png -> BossCtrl.sprite",
+      "[call] GameManager.spawnWave -> BossCtrl.enter",
+    ],
+    nodes: [
+      { label: "Level_01", kind: "graph" },
+      { label: "GameManager", kind: "graph" },
+      { label: "BossCtrl", kind: "write" },
+      { label: "spawnWave", kind: "compile" },
+      { label: "boss_sheet", kind: "audit" },
+    ],
+    links: [
+      { from: 1, to: 0, kind: "belongsTo" },
+      { from: 2, to: 0, kind: "belongsTo" },
+      { from: 1, to: 3, kind: "calls" },
+      { from: 2, to: 4, kind: "refs" },
+      { from: 3, to: 2, kind: "triggers" },
     ],
   },
   {
-    title: 'Comdr 执行 ①',
+    title: "编译计划",
+    eyebrow: "03 / compile",
+    summary: "把自然语言拆成 DSL，生成可审计、可回滚的操作序列。",
     lines: [
-      '执行 ①：创建 Player 战机',
-      '',
-      'Commander 检索超图——',
-      '  >retrieve(probe=document-serialize)',
-      '    ← 当前场景结构，直连超图无 grep',
-      '  >retrieve(schemas=cc.RigidBody2D,',
-      '      cc.BoxCollider2D, cc.Sprite)',
-      '    ← 组件属性，知识库自动补充',
-      '',
-      '生成 DSL → compile → write',
-      '[ok] Player.prefab 创建完成',
+      "compile -> add-node Boss_Entrance",
+      "compile -> attach cc.ProgressBar",
+      "compile -> bind animation: boss_enter",
+      "compile -> route event: phase.changed",
+    ],
+    nodes: [
+      { label: "DSL", kind: "compile" },
+      { label: "Boss_Entrance", kind: "write" },
+      { label: "ProgressBar", kind: "write" },
+      { label: "Animation", kind: "graph" },
+      { label: "Event", kind: "audit" },
+    ],
+    links: [
+      { from: 0, to: 1, kind: "add-node" },
+      { from: 0, to: 2, kind: "attach" },
+      { from: 0, to: 3, kind: "bind" },
+      { from: 3, to: 4, kind: "route" },
     ],
   },
   {
-    title: 'Comdr 执行 ②③④',
+    title: "写入编辑器",
+    eyebrow: "04 / write",
+    summary: "通过 Bridge 写入 Cocos Creator，并持续记录每一步影响面。",
     lines: [
-      '执行 ②：Enemy.prefab',
-      '  >compile → >comp cc.ProgressBar',
-      '  → >write',
-      '  [ok]',
-      '',
-      '执行 ③：Bullet_Player + Bullet_Enemy',
-      '  >compile ×2 → 设置速度/伤害属性',
-      '  → >write',
-      '  [ok] [ok]',
-      '',
-      '执行 ④：Level_01.scene',
-      '  >compile → 布置背景/生成点/Boss',
-      '  → >write',
-      '  [ok] 关卡搭建完成',
+      "write -> create node /Canvas/BossLayer/Boss",
+      "write -> bind SpriteFrame boss_sheet.png",
+      "write -> set ProgressBar.totalLength = 280",
+      "[ok] editor transaction committed",
+    ],
+    nodes: [
+      { label: "Bridge", kind: "write" },
+      { label: "Canvas", kind: "graph" },
+      { label: "Boss", kind: "write" },
+      { label: "SpriteFrame", kind: "audit" },
+      { label: "Transaction", kind: "compile" },
+    ],
+    links: [
+      { from: 0, to: 1, kind: "open" },
+      { from: 1, to: 2, kind: "create" },
+      { from: 2, to: 3, kind: "bind" },
+      { from: 0, to: 4, kind: "commit" },
+      { from: 4, to: 2, kind: "verify" },
     ],
   },
   {
-    title: '完成',
+    title: "审计完成",
+    eyebrow: "05 / audit",
+    summary: "生成快照和事件时间线，失败可回滚，成功可追踪。",
     lines: [
-      '执行 ⑤：接入 GameManager',
-      '  >add-comp → 绑定 Player/Bullet 引用',
-      '  → >done',
-      '',
-      '全部 5 项任务执行完毕：',
-      '  Player.prefab  ✓',
-      '  Enemy.prefab   ✓',
-      '  Bullet ×2      ✓',
-      '  Level_01.scene ✓',
-      '  GameManager    ✓',
-      '',
-      'Coding Agent 汇总结果，进入下一轮。',
-      '🎯 4 轮 · 17 条命令 · 零错误',
+      "[ok] snapshot saved, rollback available",
+      "[ok] 7 editor writes verified",
+      "[trace] Level_01 impact surface updated",
+      "handoff -> ready for designer review",
+    ],
+    nodes: [
+      { label: "Snapshot", kind: "audit" },
+      { label: "Trace", kind: "graph" },
+      { label: "Audit", kind: "audit" },
+      { label: "Rollback", kind: "write" },
+      { label: "Review", kind: "request" },
+    ],
+    links: [
+      { from: 0, to: 2, kind: "verify" },
+      { from: 1, to: 2, kind: "trace" },
+      { from: 2, to: 3, kind: "fallback" },
+      { from: 2, to: 4, kind: "handoff" },
     ],
   },
 ];
 
-const FRAME_INTERVAL = 5000; // ms — 给用户足够阅读时间
+const FRAME_INTERVAL = 4300;
+
+function linkPath(link: FrameLink) {
+  const from = SLOTS[link.from];
+  const to = SLOTS[link.to];
+  const mx = (from.x + to.x) / 2;
+  const my = (from.y + to.y) / 2;
+  const bend = link.from % 2 === 0 ? -8 : 8;
+  return `M ${from.x} ${from.y} Q ${mx + bend} ${my - bend} ${to.x} ${to.y}`;
+}
 
 export function FramePlayer() {
-  const [frameIdx, setFrameIdx] = useState(0);
-  const [displayedLines, setDisplayedLines] = useState<string[]>([]);
+  const [frameIndex, setFrameIndex] = useState(0);
   const [lineCursor, setLineCursor] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  // 逐行打字 — 80~160ms，空行 40ms
-  useEffect(() => {
-    const frame = FRAMES[frameIdx];
-    if (lineCursor >= frame.lines.length) return;
-    const delay = frame.lines[lineCursor] === '' ? 40 : 80 + Math.random() * 80;
-    const t = setTimeout(() => {
-      setDisplayedLines(prev => [...prev, frame.lines[lineCursor]]);
-      setLineCursor(prev => prev + 1);
-    }, delay);
-    return () => clearTimeout(t);
-  }, [frameIdx, lineCursor]);
+  const frame = FRAMES[frameIndex];
+  const displayedLines = useMemo(
+    () => FRAMES[frameIndex].lines.slice(0, lineCursor),
+    [frameIndex, lineCursor],
+  );
+  const typingDone = lineCursor >= frame.lines.length;
 
-  // 帧切换重置
   useEffect(() => {
-    setDisplayedLines([]);
     setLineCursor(0);
-  }, [frameIdx]);
+  }, [frameIndex]);
 
-  // 打字完成后等待，再自动翻页（暂停时停止）
-  const typingDone = lineCursor >= FRAMES[frameIdx].lines.length;
+  useEffect(() => {
+    if (typingDone) return;
+    const delay = frame.lines[lineCursor]?.startsWith("[") ? 180 : 260;
+    const timer = setTimeout(() => {
+      setLineCursor(value => Math.min(value + 1, frame.lines.length));
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [frame.lines, lineCursor, typingDone]);
+
   useEffect(() => {
     if (!typingDone || paused) return;
-    const t = setTimeout(() => {
-      setFrameIdx(prev => (prev + 1) % FRAMES.length);
+    const timer = setTimeout(() => {
+      setFrameIndex(value => (value + 1) % FRAMES.length);
     }, FRAME_INTERVAL);
-    return () => clearTimeout(t);
-  }, [typingDone, paused, frameIdx]);
+    return () => clearTimeout(timer);
+  }, [typingDone, paused]);
 
-  // 手动翻页 → 永久暂停
-  const goTo = useCallback((i: number) => {
-    setFrameIdx(i);
+  const goTo = useCallback((index: number) => {
+    setFrameIndex(index);
     setPaused(true);
   }, []);
-
-  const resume = useCallback(() => setPaused(false), []);
-
-  const frame = FRAMES[frameIdx];
 
   return (
     <div className="frame-player">
       <div className="frame-window">
         <div className="frame-titlebar">
           <span className="frame-dots"><i /><i /><i /></span>
-          <span className="frame-title">Comdr · Commander Session</span>
-          <span className="frame-badge">{frame.title}</span>
+          <span className="frame-title">Comdr Session</span>
+          <span className="frame-badge">{frame.eyebrow}</span>
         </div>
+
         <div className="frame-body">
-          {displayedLines.map((line, i) => (
-            <div key={i} className={`frame-line ${
-              line.startsWith('[ok]') ? 'line-ok'
-              : line.startsWith('[err]') ? 'line-err'
-              : line.startsWith('>') ? 'line-cmd'
-              : line.startsWith('  ├') || line.startsWith('  └') || line.startsWith('...') ? 'line-tree'
-              : line.startsWith('  >') ? 'line-subcmd'
-              : line.startsWith('🎯') ? 'line-done'
-              : ''}`}>
-              {line || ' '}
-            </div>
-          ))}
-          {lineCursor < frame.lines.length && (
-            <span className="frame-cursor">▊</span>
-          )}
+          <div className="frame-graph" aria-label="Comdr execution hypergraph">
+            <svg className="frame-graph-links" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <filter id="flowGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="1.35" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              {frame.links.map((link, index) => (
+                <g key={`${frame.title}-${link.kind}-${index}`}>
+                  <path className="frame-graph-link-glow" d={linkPath(link)} />
+                  <path className="frame-graph-link" d={linkPath(link)} />
+                  <text className="frame-graph-label">
+                    <textPath href={`#frame-link-${frameIndex}-${index}`} startOffset="50%">{link.kind}</textPath>
+                  </text>
+                  <path id={`frame-link-${frameIndex}-${index}`} d={linkPath(link)} fill="none" />
+                </g>
+              ))}
+            </svg>
+            <i className="frame-graph-core" />
+            <span className="frame-graph-core-label">Comdr</span>
+            {frame.nodes.map((node, index) => (
+              <span
+                key={`${node.label}-${index}`}
+                className={`frame-graph-node frame-graph-node--${node.kind}`}
+                style={{
+                  left: `${SLOTS[index].x}%`,
+                  top: `${SLOTS[index].y}%`,
+                  animationDelay: `${index * -0.72}s`,
+                }}
+              >
+                {node.label}
+              </span>
+            ))}
+            <span className="frame-graph-spark frame-graph-spark--one" />
+            <span className="frame-graph-spark frame-graph-spark--two" />
+            <span className="frame-graph-spark frame-graph-spark--three" />
+          </div>
+
+          <div className="frame-copy">
+            <span>{frame.title}</span>
+            <h3>{frame.summary}</h3>
+          </div>
+
+          <div className="frame-terminal" aria-label="Comdr execution log">
+            {displayedLines.map((line, index) => (
+              <div
+                key={`${frame.title}-${index}-${line}`}
+                className={`frame-line ${line.startsWith("[ok]") ? "line-ok" : line.startsWith("[") ? "line-note" : line.startsWith(">") ? "line-cmd" : ""}`}
+              >
+                {line}
+              </div>
+            ))}
+            {!typingDone && <span className="frame-cursor" />}
+          </div>
         </div>
       </div>
 
-      <div className="frame-dots-row">
-        {FRAMES.map((f, i) => (
-          <button key={i}
-            className={`frame-dot ${i === frameIdx ? 'active' : ''}`}
-            onClick={() => goTo(i)} title={f.title}>
+      <div className="frame-dots-row" aria-label="执行流步骤">
+        {FRAMES.map((item, index) => (
+          <button
+            key={item.title}
+            className={`frame-dot ${index === frameIndex ? "active" : ""}`}
+            onClick={() => goTo(index)}
+            title={item.title}
+          >
             <span className="dot-indicator" />
-            <span className="dot-label">{f.title}</span>
+            <span className="dot-label">{item.title}</span>
           </button>
         ))}
         {paused && (
-          <button className="frame-resume" onClick={resume}>
-            ▶ 自动播放
+          <button className="frame-resume" onClick={() => setPaused(false)}>
+            继续自动播放
           </button>
         )}
       </div>

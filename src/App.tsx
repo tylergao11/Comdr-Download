@@ -1,311 +1,209 @@
-import { useState, useCallback, useEffect } from 'react';
-import { siteConfig } from './site-config';
-import { GraphCanvas } from './components/GraphCanvas';
-import { FramePlayer } from './components/FramePlayer';
+import { useState, type ReactNode } from "react";
+import { motion } from "motion/react";
+import { siteConfig } from "./site-config";
+import { FramePlayer } from "./components/FramePlayer";
+import { HeroStarfield } from "./components/HeroStarfield";
+
+const reveal = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-12% 0px" },
+  transition: { duration: 0.7, ease: "easeOut" as const },
+};
+
+function Reveal({ children }: { children: ReactNode }) {
+  return <motion.div {...reveal}>{children}</motion.div>;
+}
 
 export function App() {
   return (
     <>
       <Nav />
-      <div className="site">
+      <main className="site">
         <Hero />
-        <Capabilities />
-        <Hypergraph />
-        <AiEditor />
-        <Architecture />
-        <Install />
-        <McpConfig />
+        <Reveal><CapabilityBand /></Reveal>
+        <Reveal><ScenarioPills /></Reveal>
+        <Reveal><DevFlowSection /></Reveal>
+        <Reveal><SafetySection /></Reveal>
+        <Reveal><InstallSection /></Reveal>
         <Footer />
-      </div>
+      </main>
     </>
   );
 }
 
-// ── Nav ─────────────────────────────────────────────────────
-
 function Nav() {
   const [open, setOpen] = useState(false);
-  const close = useCallback(() => setOpen(false), []);
-
-  // 点击菜单链接后关闭
-  useEffect(() => {
-    if (!open) return;
-    const handler = () => setOpen(false);
-    window.addEventListener('hashchange', handler);
-    return () => window.removeEventListener('hashchange', handler);
-  }, [open]);
+  const close = () => setOpen(false);
 
   return (
     <nav className="nav-bar">
-      <div className="nav-inner">
-        <span className="nav-logo">Comdr</span>
-        <div className={`nav-links ${open ? 'nav-open' : ''}`}>
-          <a href="#hypergraph" onClick={close}>超图</a>
-          <a href="#ai-editor" onClick={close}>AI 编辑器</a>
-          <a href="#architecture" onClick={close}>架构</a>
-          <a href="#install" onClick={close}>安装</a>
-        </div>
-        <a className="nav-cta" href="#install">安装</a>
-        <button
-          className={`hamburger ${open ? 'ham-active' : ''}`}
-          onClick={() => setOpen(o => !o)}
-          aria-label="菜单"
-        >
-          <span /><span /><span />
-        </button>
+      <a className="brand" href="#" onClick={close}>
+        <img src="/comdr-icon.svg" alt="" />
+        <span>Comdr</span>
+      </a>
+      <div className={`nav-links ${open ? "nav-links--open" : ""}`}>
+        <a href="#graph" onClick={close}>星图</a>
+        <a href="#workflow" onClick={close}>执行流</a>
+        <a href="#install" onClick={close}>安装</a>
+        <a href={siteConfig.links.github} target="_blank" rel="noreferrer">GitHub</a>
+        <a className="nav-cta-mobile" href="#install" onClick={close}>开始接入</a>
       </div>
+      <a className="nav-cta" href="#install">开始接入</a>
+      <button className="nav-toggle" onClick={() => setOpen(value => !value)} aria-label="菜单">
+        <span /><span /><span />
+      </button>
     </nav>
   );
 }
 
-// ── Hero ────────────────────────────────────────────────────
-
 function Hero() {
-  const { tagline, description, phase, links } = siteConfig;
-
   return (
-    <section className="hero">
-      {phase !== 'stable' && (
-        <span className="phase-badge" data-phase={phase}>
-          {phase.toUpperCase()}
-        </span>
-      )}
-      <h1 className="hero-tagline">{tagline}</h1>
-      <p className="hero-desc">{description}</p>
-
-      <div className="hero-actions">
-        <a className="btn-primary" href="#install">
-          开始安装
-        </a>
-        <a className="btn-ghost" href="#hypergraph">
-          查看能力
-        </a>
-      </div>
-
-      <div className="hero-trust">
-        <a href={links.github} target="_blank" rel="noopener">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-          </svg>
-          GitHub
-        </a>
-        <span className="trust-sep">·</span>
-        <span>MCP</span>
-        <span className="trust-sep">·</span>
-        <span>Cocos Creator</span>
+    <section className="hero" id="graph">
+      <HeroStarfield />
+      <div className="hero-copy">
+        <span className="phase-chip">{siteConfig.phase.toUpperCase()}</span>
+        <h1>{siteConfig.tagline}</h1>
+        <p>{siteConfig.description}</p>
+        <div className="hero-actions">
+          <a className="btn-primary" href="#install">配置 MCP</a>
+          <a className="btn-secondary" href="#workflow">观看执行流</a>
+        </div>
       </div>
     </section>
   );
 }
 
-// ── Capabilities — Bento Grid ────────────────────────────────
-
-function Capabilities() {
+function CapabilityBand() {
   return (
-    <section className="capabilities-section">
-      <div className="section-head">
-        <h2>两大核心能力</h2>
-        <p className="section-sub">
-          超图读懂项目，自动化编辑操作项目。深度接入 Cocos Creator 引擎。
-        </p>
+    <section className="capability-band-section">
+      <div className="section-copy">
+        <span className="section-kicker">Capabilities</span>
+        <h2>三层能力，把 Cocos 项目变成 AI 可操作的对象</h2>
       </div>
-
-      <div className="bento">
-        {siteConfig.capabilities.map((cap) => (
-          <div key={cap.title} className="bento-card">
-            <span className="bento-icon">{cap.icon}</span>
-            <h3>{cap.title}</h3>
-            <p className="bento-summary">{cap.summary}</p>
-            <ul className="bento-bullets">
-              {cap.bullets.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-          </div>
+      <div className="capability-band">
+        {siteConfig.capabilities.map(capability => (
+          <article className="capability-card" key={capability.title}>
+            <h2>{capability.title}</h2>
+            <p>{capability.summary}</p>
+            <div className="tag-cloud">
+              {capability.bullets.map(bullet => <span key={bullet}>{bullet}</span>)}
+            </div>
+          </article>
         ))}
       </div>
     </section>
   );
 }
 
-// ── Hypergraph ──────────────────────────────────────────────
-
-function Hypergraph() {
+function ScenarioPills() {
   return (
-    <section className="hypergraph-section" id="hypergraph">
-      <div className="section-head">
-        <h2>超图 — 完整的项目理解</h2>
-        <p className="section-sub">
-          不仅是增强检索，而是真正的语义连线。从方法调用追溯到每一个受影响的 Prefab 和资源。
-        </p>
+    <div className="scenario-pills">
+      <span className="scenario-pills__label">全自动开发工作流</span>
+      <div className="scenario-pills__row">
+        <span>自然语言输入，Cocos 编辑器中即时落地</span>
+        <span>星图自动检索上下文，补齐组件依赖</span>
+        <span>每一步快照可回滚，全链路可审计</span>
       </div>
-
-      <GraphCanvas />
-
-      {/* 图例 — 纯 CSS 类，无 inline style */}
-      <div className="legend">
-        <div className="legend-group">
-          <span className="legend-label">节点</span>
-          <div className="legend-items">
-            <span className="legend-item"><i className="legend-dot lgd-doc" />文档</span>
-            <span className="legend-item"><i className="legend-dot lgd-scr" />脚本</span>
-            <span className="legend-item"><i className="legend-dot lgd-node" />节点</span>
-            <span className="legend-item"><i className="legend-dot lgd-meth" />方法</span>
-            <span className="legend-item"><i className="legend-dot lgd-ast" />资源</span>
-          </div>
-        </div>
-        <div className="legend-group">
-          <span className="legend-label">边</span>
-          <div className="legend-items">
-            <span className="legend-item"><i className="legend-line lge-calls" />调用</span>
-            <span className="legend-item"><i className="legend-line lge-triggers" />事件</span>
-            <span className="legend-item"><i className="legend-line lge-refs" />引用</span>
-            <span className="legend-item"><i className="legend-line lge-imports" />导入</span>
-            <span className="legend-item"><i className="legend-line lge-belong" />归属</span>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }
 
-// ── AI Editor ────────────────────────────────────────────────
-
-function AiEditor() {
+function DevFlowSection() {
   return (
-    <section className="ai-editor-section" id="ai-editor">
-      <div className="section-head">
-        <h2>自动化编辑 — 描述即所得</h2>
-        <p className="section-sub">
-          自然语言描述需求，Comdr 实时翻译为 Cocos Creator 编辑器操作。
+    <section className="dev-flow-section" id="workflow">
+      <div className="section-copy">
+        <span className="section-kicker">Execution Flow</span>
+        <h2>把需求推进成可审计的编辑器操作</h2>
+        <p>
+          检索上下文、编译 DSL、写入 Cocos、记录快照。它像一条穿过星河的执行轨迹。
         </p>
       </div>
-
       <FramePlayer />
     </section>
   );
 }
 
-// ── Architecture ─────────────────────────────────────────────
-
-function Architecture() {
+function SafetySection() {
   return (
-    <section className="architecture-section" id="architecture">
-      <div className="section-head">
-        <h2>架构 — 六包协同</h2>
-        <p className="section-sub">
-          每个包职责单一、边界清晰。从共享类型到桌面面板，全链路覆盖。
-        </p>
+    <section className="safety-section">
+      <div className="section-copy">
+        <span className="section-kicker">Safety &amp; Observability</span>
+        <h2>每一次写入都可追踪、可回滚</h2>
       </div>
-
-      <div className="arch-grid">
-        {siteConfig.architecture.packages.map((pkg) => (
-          <div key={pkg.name} className="arch-card">
-            <h4 className="arch-name">{pkg.name}</h4>
-            <p className="arch-desc">{pkg.desc}</p>
-          </div>
+      <div className="safety-grid">
+        {[
+          {
+            title: "写入前快照",
+            desc: "Bridge 发起写操作前自动记录场景状态。出问题一键回滚到上一个干净态，不留残留节点。",
+            icon: "◉",
+          },
+          {
+            title: "影响面高亮",
+            desc: "星图实时标记被改动波及的节点、脚本和调用链。改了一个 Prefab，哪些脚本会受影响一目了然。",
+            icon: "◎",
+          },
+          {
+            title: "事件时间线",
+            desc: "每次 DSL 编译、写入、回滚、审计都记为带时间戳的事件。可回放任意一段操作历史。",
+            icon: "◷",
+          },
+          {
+            title: "多端接入",
+            desc: "同一套 MCP 命令，Claude、Cursor、VS Code 都能用。Comdr View 作为桌面面板统一监控所有客户端的操作。",
+            icon: "⎔",
+          },
+        ].map(item => (
+          <article className="safety-card" key={item.title}>
+            <span className="safety-card__icon">{item.icon}</span>
+            <h3>{item.title}</h3>
+            <p>{item.desc}</p>
+          </article>
         ))}
       </div>
     </section>
   );
 }
 
-// ── Install ──────────────────────────────────────────────────
+function InstallSection() {
+  const [copied, setCopied] = useState(false);
 
-function Install() {
-  const steps = siteConfig.installSteps;
-  const [copiedIdx, setCopiedIdx] = useState(-1);
+  const prompt = `安装 Comdr：
+1. npm install && npm run build
+2. 安装 Bridge 扩展，指定我的 Cocos 项目路径
+3. 配好 MCP 客户端，指向 server.js`;
 
-  const handleCopy = (step: typeof steps[0], i: number) => {
-    const text = step.ready ? step.readyText : step.fallbackText;
-    navigator.clipboard.writeText(text).catch(() => {});
-    setCopiedIdx(i);
-    setTimeout(() => setCopiedIdx(-1), 1800);
+  const copy = () => {
+    navigator.clipboard.writeText(prompt).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1400);
   };
 
   return (
-    <section className="install" id="install">
-      <div className="section-head">
-        <h2>安装</h2>
-        <p className="section-sub">
-          四步，除 Bridge 需重启 Creator 外其余立即可用。
-        </p>
+    <section className="install-section" id="install">
+      <div className="section-copy">
+        <span className="section-kicker">Install</span>
+        <h2>接入指令</h2>
       </div>
-      <div className="install-steps">
-        {steps.map((step, i) => (
-          <div key={i} className="install-step">
-            <button
-              className={`step-copy-btn ${copiedIdx === i ? 'copied' : ''}`}
-              onClick={() => handleCopy(step, i)}
-            >
-              {copiedIdx === i ? '已复制' : '复制'}
-            </button>
-            <div className="install-step-head">
-              <span className="step-num">{i + 1}</span>
-              <div className="install-step-title">
-                <h3>{step.label}</h3>
-                {step.note && <span className="step-note">{step.note}</span>}
-              </div>
-            </div>
-            {step.ready ? (
-              <pre className="code-block"><code>{step.readyText}</code></pre>
-            ) : (
-              <div className="step-pending-block">
-                <span className="pending-label">Alpha — 当前走源码</span>
-                <pre className="code-block"><code>{step.fallbackText}</code></pre>
-              </div>
-            )}
-          </div>
-        ))}
+
+      <div className="install-prompt-card">
+        <pre><code>{prompt}</code></pre>
+        <button onClick={copy}>
+          {copied ? "已复制" : "复制"}
+        </button>
       </div>
     </section>
   );
 }
-
-// ── MCP Config ───────────────────────────────────────────────
-
-function McpConfig() {
-  const { mcpClients } = siteConfig;
-
-  return (
-    <section className="mcp-config" id="mcp-config">
-      <div className="section-head">
-        <h2>MCP 配置</h2>
-        <p className="section-sub">
-          一份配置，适用所有 MCP 兼容的 AI 客户端。
-        </p>
-      </div>
-
-      <div className="mcp-snippet">
-        <pre className="code-block"><code>{mcpClients[0].configSnippet}</code></pre>
-      </div>
-
-      <div className="mcp-tags">
-        {mcpClients.map((c) => (
-          <span key={c.id} className="mcp-tag">
-            {c.name}
-            {c.docUrl && (
-              <a href={c.docUrl} target="_blank" rel="noopener">文档 →</a>
-            )}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ── Footer ───────────────────────────────────────────────────
 
 function Footer() {
-  const { links } = siteConfig;
-
   return (
     <footer className="footer">
-      <div className="footer-links">
-        <a href={links.github} target="_blank" rel="noopener">GitHub</a>
-        <a href={links.docsRepo} target="_blank" rel="noopener">Documentation</a>
+      <span>Comdr · 更懂游戏开发的AI编辑器</span>
+      <div>
+        <a href={siteConfig.links.github} target="_blank" rel="noreferrer">GitHub</a>
+        <a href={siteConfig.links.docsRepo} target="_blank" rel="noreferrer">Docs</a>
       </div>
-      <span>Comdr · {siteConfig.phase}</span>
     </footer>
   );
 }
