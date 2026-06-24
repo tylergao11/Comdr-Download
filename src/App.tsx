@@ -86,7 +86,7 @@ function Capabilities() {
       <div className="section-head">
         <h2>两大核心能力</h2>
         <p className="section-sub">
-          理解项目，操作项目。可视化贯穿始终。
+          超图读懂项目，自动化编辑操作项目。深度接入 Cocos Creator 引擎。
         </p>
       </div>
 
@@ -155,9 +155,9 @@ function AiEditor() {
   return (
     <section className="ai-editor-section" id="ai-editor">
       <div className="section-head">
-        <h2>AI 编辑器 — 描述即所得</h2>
+        <h2>自动化编辑 — 描述即所得</h2>
         <p className="section-sub">
-          从意图到执行，Coding Agent 与 Comdr 协同完成整个开发链路。
+          自然语言描述需求，Comdr 实时翻译为 Cocos Creator 编辑器操作。
         </p>
       </div>
 
