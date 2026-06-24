@@ -46,7 +46,6 @@ function Nav() {
         <a href="#graph" onClick={close}>星图</a>
         <a href="#workflow" onClick={close}>执行流</a>
         <a href="#install" onClick={close}>安装</a>
-        <a href={siteConfig.links.github} target="_blank" rel="noreferrer">GitHub</a>
         <a className="nav-cta-mobile" href="#install" onClick={close}>开始接入</a>
       </div>
       <a className="nav-cta" href="#install">开始接入</a>
@@ -168,10 +167,10 @@ function SafetySection() {
 function InstallSection() {
   const [copied, setCopied] = useState(false);
 
-  const prompt = `安装 Comdr：
-1. npm install && npm run build
-2. 安装 Bridge 扩展，指定我的 Cocos 项目路径
-3. 配好 MCP 客户端，指向 server.js`;
+  const prompt = `帮我安装 Comdr：
+1. npm install -g comdr
+2. 从最新 Release 下载 Bridge 扩展，装到 Cocos 项目
+3. 在 MCP 客户端里加上 comdr server`;
 
   const copy = () => {
     navigator.clipboard.writeText(prompt).catch(() => {});
@@ -200,10 +199,6 @@ function Footer() {
   return (
     <footer className="footer">
       <span>Comdr · 更懂游戏开发的AI编辑器</span>
-      <div>
-        <a href={siteConfig.links.github} target="_blank" rel="noreferrer">GitHub</a>
-        <a href={siteConfig.links.docsRepo} target="_blank" rel="noreferrer">Docs</a>
-      </div>
     </footer>
   );
 }
