@@ -25,9 +25,17 @@ function makeStars(count: number): Star[] {
   });
 }
 
+const STAR_COUNT = 180;
+
 export function HeroStarfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const starsRef = useRef<Star[]>([]);
+  const gradientRef = useRef<{ core: CanvasGradient | null; belt: CanvasGradient | null }>({
+    core: null,
+    belt: null,
+  });
+  const rafRef = useRef<number>(0);
+  const visibleRef = useRef(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,10 +43,42 @@ export function HeroStarfield() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    starsRef.current = makeStars(260);
+    starsRef.current = makeStars(STAR_COUNT);
     let width = 0;
     let height = 0;
     let running = true;
+
+    // ---- IntersectionObserver: pause when not visible ----
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(canvas);
+
+    // ---- internal helpers that recreate gradients once per resize ----
+    const buildGradients = () => {
+      const g = gradientRef.current;
+      g.core = ctx.createRadialGradient(
+        width * 0.56,
+        height * 0.36,
+        0,
+        width * 0.56,
+        height * 0.36,
+        Math.max(width, height) * 0.74,
+      );
+      g.core.addColorStop(0, "rgba(125,167,255,0.10)");
+      g.core.addColorStop(0.42, "rgba(82,224,207,0.040)");
+      g.core.addColorStop(1, "rgba(0,0,0,0)");
+
+      g.belt = ctx.createLinearGradient(0, 0, width, height * 0.82);
+      g.belt.addColorStop(0, "rgba(0,0,0,0)");
+      g.belt.addColorStop(0.42, "rgba(181,156,255,0.060)");
+      g.belt.addColorStop(0.54, "rgba(244,200,106,0.038)");
+      g.belt.addColorStop(0.70, "rgba(82,224,207,0.038)");
+      g.belt.addColorStop(1, "rgba(0,0,0,0)");
+    };
 
     const resize = () => {
       const parent = canvas.parentElement;
@@ -50,6 +90,7 @@ export function HeroStarfield() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildGradients();
     };
 
     resize();
@@ -57,23 +98,32 @@ export function HeroStarfield() {
 
     const render = (now: number) => {
       if (!running) return;
+
+      if (!visibleRef.current) {
+        // Skip this frame — request next, no drawing
+        rafRef.current = requestAnimationFrame(render);
+        return;
+      }
+
       const t = now / 1000;
       ctx.clearRect(0, 0, width, height);
 
-      const core = ctx.createRadialGradient(width * 0.56, height * 0.36, 0, width * 0.56, height * 0.36, Math.max(width, height) * 0.74);
-      core.addColorStop(0, "rgba(125,167,255,0.10)");
-      core.addColorStop(0.42, "rgba(82,224,207,0.040)");
-      core.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = core;
-      ctx.fillRect(0, 0, width, height);
+      // Reuse cached gradients
+      const { core, belt } = gradientRef.current;
+      if (core) {
+        ctx.fillStyle = core;
+        ctx.fillRect(0, 0, width, height);
+      }
 
-      const belt = ctx.createLinearGradient(0, height * 0.18 + Math.sin(t * 0.08) * 20, width, height * 0.82);
-      belt.addColorStop(0, "rgba(0,0,0,0)");
-      belt.addColorStop(0.42, "rgba(181,156,255,0.060)");
-      belt.addColorStop(0.54, "rgba(244,200,106,0.038)");
-      belt.addColorStop(0.70, "rgba(82,224,207,0.038)");
-      belt.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = belt;
+      // Animate belt's start/end for slight movement
+      const beltTop = height * 0.18 + Math.sin(t * 0.08) * 20;
+      const beltGrad = ctx.createLinearGradient(0, beltTop, width, height * 0.82);
+      beltGrad.addColorStop(0, "rgba(0,0,0,0)");
+      beltGrad.addColorStop(0.42, "rgba(181,156,255,0.060)");
+      beltGrad.addColorStop(0.54, "rgba(244,200,106,0.038)");
+      beltGrad.addColorStop(0.70, "rgba(82,224,207,0.038)");
+      beltGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = beltGrad;
       ctx.fillRect(0, 0, width, height);
 
       for (const star of starsRef.current) {
@@ -87,12 +137,14 @@ export function HeroStarfield() {
         ctx.fill();
       }
 
-      requestAnimationFrame(render);
+      rafRef.current = requestAnimationFrame(render);
     };
 
-    requestAnimationFrame(render);
+    rafRef.current = requestAnimationFrame(render);
     return () => {
       running = false;
+      cancelAnimationFrame(rafRef.current);
+      observer.disconnect();
       window.removeEventListener("resize", resize);
     };
   }, []);

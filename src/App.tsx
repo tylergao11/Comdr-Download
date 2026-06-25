@@ -22,9 +22,9 @@ export function App() {
       <main className="site">
         <Hero />
         <Reveal><CapabilityBand /></Reveal>
+        <Reveal><AdvantageBand /></Reveal>
 
         <Reveal><DevFlowSection /></Reveal>
-        <Reveal><SafetySection /></Reveal>
         <Reveal><InstallSection /></Reveal>
         <Footer />
       </main>
@@ -39,7 +39,7 @@ function Nav() {
   return (
     <nav className="nav-bar">
       <a className="brand" href="#" onClick={close}>
-        <img src="/comdr-icon.svg" alt="" />
+        <img src={`${import.meta.env.BASE_URL}comdr-icon.svg`} alt="" />
         <span>Comdr</span>
       </a>
       <div className={`nav-links ${open ? "nav-links--open" : ""}`}>
@@ -65,30 +65,55 @@ function Hero() {
         <h1>{siteConfig.tagline}</h1>
         <p>{siteConfig.description}</p>
         <div className="hero-actions">
-          <a className="btn-primary" href="#install">配置 MCP</a>
-          <a className="btn-secondary" href="#workflow">观看执行流</a>
+          <a className="btn-secondary" href="#install">配置 MCP</a>
+          <a className="btn-primary" href="#workflow">观看执行流</a>
         </div>
       </div>
+      <button
+        className="scroll-indicator"
+        aria-label="向下滚动"
+        onClick={() => {
+          window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
+        }}
+      >
+        <span className="scroll-chevron" />
+      </button>
     </section>
   );
 }
 
 function CapabilityBand() {
   return (
-    <section className="capability-band-section">
+    <section className="capability-band-section" id="capabilities">
       <div className="section-copy">
         <span className="section-kicker">Capabilities</span>
-        <h2>三层能力，把 Cocos 项目变成 AI 可操作的对象</h2>
+        <h2>两大核心能力</h2>
       </div>
       <div className="capability-band">
-        {siteConfig.capabilities.map(capability => (
+        {siteConfig.capabilities.map((capability, i) => (
           <article className="capability-card" key={capability.title}>
+            <span className="capability-num">{String(i + 1).padStart(2, "0")}</span>
             <h2>{capability.title}</h2>
             <p>{capability.summary}</p>
             <div className="tag-cloud">
               {capability.bullets.map(bullet => <span key={bullet}>{bullet}</span>)}
             </div>
           </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AdvantageBand() {
+  return (
+    <section className="advantage-band-section">
+      <div className="advantage-band">
+        {siteConfig.advantages.map(a => (
+          <div className="advantage-item" key={a.keyword}>
+            <span className="advantage-keyword">{a.keyword}</span>
+            <span className="advantage-desc">{a.description}</span>
+          </div>
         ))}
       </div>
     </section>
@@ -106,47 +131,6 @@ function DevFlowSection() {
         </p>
       </div>
       <FramePlayer />
-    </section>
-  );
-}
-
-function SafetySection() {
-  return (
-    <section className="safety-section">
-      <div className="section-copy">
-        <span className="section-kicker">Safety &amp; Observability</span>
-        <h2>每一次写入都可追踪、可回滚</h2>
-      </div>
-      <div className="safety-grid">
-        {[
-          {
-            title: "写入前快照",
-            desc: "Bridge 发起写操作前自动记录场景状态。出问题一键回滚到上一个干净态，不留残留节点。",
-            icon: "◉",
-          },
-          {
-            title: "影响面高亮",
-            desc: "星图实时标记被改动波及的节点、脚本和调用链。改了一个 Prefab，哪些脚本会受影响一目了然。",
-            icon: "◎",
-          },
-          {
-            title: "事件时间线",
-            desc: "每次 DSL 编译、写入、回滚、审计都记为带时间戳的事件。可回放任意一段操作历史。",
-            icon: "◷",
-          },
-          {
-            title: "多端接入",
-            desc: "同一套 MCP 命令，Claude、Cursor、VS Code 都能用。Comdr View 作为桌面面板统一监控所有客户端的操作。",
-            icon: "⎔",
-          },
-        ].map(item => (
-          <article className="safety-card" key={item.title}>
-            <span className="safety-card__icon">{item.icon}</span>
-            <h3>{item.title}</h3>
-            <p>{item.desc}</p>
-          </article>
-        ))}
-      </div>
     </section>
   );
 }

@@ -44,15 +44,13 @@ body::before {
   inset: 0;
   z-index: -2;
   pointer-events: none;
+  transform: translateZ(0);
   background-image:
-    radial-gradient(1px 1px at 8% 13%, rgba(255,255,255,.28) 50%, transparent 52%),
-    radial-gradient(1px 1px at 18% 72%, rgba(125,167,255,.30) 50%, transparent 52%),
-    radial-gradient(1px 1px at 32% 24%, rgba(244,200,106,.22) 50%, transparent 52%),
-    radial-gradient(1px 1px at 48% 82%, rgba(82,224,207,.25) 50%, transparent 52%),
-    radial-gradient(1px 1px at 66% 18%, rgba(255,255,255,.22) 50%, transparent 52%),
-    radial-gradient(1px 1px at 82% 62%, rgba(181,156,255,.25) 50%, transparent 52%),
-    radial-gradient(1px 1px at 92% 28%, rgba(125,167,255,.28) 50%, transparent 52%);
-  background-size: 420px 420px;
+    radial-gradient(1.2px 1.2px at 18% 28%, rgba(125,167,255,.32) 50%, transparent 52%),
+    radial-gradient(1px 1px at 42% 14%, rgba(244,200,106,.24) 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 68% 48%, rgba(82,224,207,.26) 50%, transparent 52%),
+    radial-gradient(1px 1px at 88% 72%, rgba(181,156,255,.26) 50%, transparent 52%);
+  background-size: 540px 540px;
   opacity: .72;
 }
 
@@ -78,7 +76,7 @@ button, input { font: inherit; }
   padding: 0 12px 0 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(5, 8, 20, 0.72);
+  background: rgba(5, 8, 20, 0.88);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -247,6 +245,51 @@ button, input { font: inherit; }
 .btn-primary:hover,
 .btn-secondary:hover {
   transform: translateY(-1px);
+}
+
+/* ---- Scroll indicator ---- */
+
+.scroll-indicator {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 30;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(125, 167, 255, .24);
+  border-radius: 50%;
+  background: rgba(10, 15, 34, .52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: scroll-bounce 2s ease-in-out infinite;
+  transition: border-color .24s ease, background .24s ease, box-shadow .24s ease;
+}
+
+.scroll-indicator:hover {
+  border-color: rgba(244, 200, 106, .50);
+  background: rgba(244, 200, 106, .10);
+  box-shadow: 0 0 18px rgba(244, 200, 106, .14);
+}
+
+.scroll-chevron {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(174, 187, 210, .72);
+  border-bottom: 2px solid rgba(174, 187, 210, .72);
+  transform: rotate(45deg);
+  margin-top: -4px;
+}
+
+.scroll-indicator:hover .scroll-chevron {
+  border-color: var(--gold);
+}
+
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
 }
 
 section {
@@ -427,6 +470,7 @@ section {
   fill: none;
   vector-effect: non-scaling-stroke;
   filter: url(#flowGlow);
+  will-change: stroke-dashoffset;
 }
 
 .frame-graph-link-glow {
@@ -491,9 +535,10 @@ section {
   box-shadow: 0 0 22px rgba(82, 224, 207, .12);
   font-family: var(--font-mono);
   font-size: 11px;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) translateZ(0);
   animation: frame-node-float 4.8s ease-in-out infinite;
   white-space: nowrap;
+  will-change: transform;
 }
 
 .frame-graph-node--request { border-color: rgba(125, 167, 255, .34); box-shadow: 0 0 20px rgba(125, 167, 255, .14); }
@@ -511,6 +556,7 @@ section {
   background: #ffffff;
   box-shadow: 0 0 16px rgba(82, 224, 207, .8);
   opacity: .72;
+  will-change: transform, opacity;
 }
 
 .frame-graph-spark--one { left: 17%; top: 33%; animation: frame-spark-one 3.4s linear infinite; }
@@ -692,8 +738,10 @@ section {
 
 .capability-band {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  max-width: 780px;
+  margin: 0 auto;
 }
 
 .capability-card {
@@ -711,53 +759,63 @@ section {
   letter-spacing: 0;
 }
 
+.capability-num {
+  display: inline-block;
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-bottom: 10px;
+  opacity: .7;
+}
+
 .capability-card p {
   margin-top: 12px;
   color: var(--text-soft);
   line-height: 1.72;
 }
 
-/* --- Safety section --- */
+/* --- Advantage band --- */
 
-.safety-grid {
+.advantage-band-section {
+  padding-top: 0;
+}
+
+.advantage-band {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-
-.safety-card {
-  border: 1px solid rgba(125, 167, 255, .16);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  max-width: 780px;
+  margin: 0 auto;
+  border: 1px solid rgba(125, 167, 255, .12);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(14, 21, 46, .68), rgba(6, 10, 25, .74));
-  min-height: 240px;
-  padding: 24px;
+  overflow: hidden;
 }
 
-.safety-card__icon {
-  display: inline-flex;
+.advantage-item {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius);
+  gap: 4px;
+  padding: 32px 18px;
+  text-align: center;
+}
+
+.advantage-item + .advantage-item {
+  border-left: 1px solid rgba(125, 167, 255, .12);
+}
+
+.advantage-keyword {
   color: var(--gold);
-  background: rgba(244, 200, 106, .10);
-  font-family: var(--font-mono);
-  font-size: 16px;
-  margin-bottom: 14px;
-}
-
-.safety-card h3 {
-  margin-bottom: 10px;
-  color: var(--text);
   font-size: 20px;
+  font-weight: 700;
 }
 
-.safety-card p {
+.advantage-desc {
   color: var(--text-soft);
-  line-height: 1.72;
   font-size: 14px;
 }
+
 
 /* --- Install stepper --- */
 
@@ -830,8 +888,7 @@ section {
     padding-top: 112px;
   }
 
-  .capability-band,
-  .safety-grid {
+  .capability-band {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -890,8 +947,11 @@ section {
   .nav-cta-mobile {
     display: block;
     padding: 13px 10px;
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--text-soft);
+    font-weight: 600;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
+    padding-top: 16px;
   }
 
   .nav-toggle {
@@ -919,8 +979,13 @@ section {
   }
 
   .capability-band,
-  .safety-grid {
+  .advantage-band {
     grid-template-columns: 1fr;
+  }
+
+  .advantage-item + .advantage-item {
+    border-left: none;
+    border-top: 1px solid rgba(125, 167, 255, .12);
   }
 
   .frame-body {
