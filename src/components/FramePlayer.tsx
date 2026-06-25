@@ -157,9 +157,11 @@ const FRAMES: Frame[] = [
 
 const FRAME_INTERVAL = 4300;
 
+const FALLBACK_SLOT = { x: 50, y: 50 };
+
 function linkPath(link: FrameLink) {
-  const from = SLOTS[link.from];
-  const to = SLOTS[link.to];
+  const from = SLOTS[link.from] ?? FALLBACK_SLOT;
+  const to = SLOTS[link.to] ?? FALLBACK_SLOT;
   const mx = (from.x + to.x) / 2;
   const my = (from.y + to.y) / 2;
   const bend = link.from % 2 === 0 ? -8 : 8;
@@ -238,19 +240,23 @@ export function FramePlayer() {
             </svg>
             <i className="frame-graph-core" />
             <span className="frame-graph-core-label">Comdr</span>
-            {frame.nodes.map((node, index) => (
-              <span
-                key={`${node.label}-${index}`}
-                className={`frame-graph-node frame-graph-node--${node.kind}`}
-                style={{
-                  left: `${SLOTS[index].x}%`,
-                  top: `${SLOTS[index].y}%`,
-                  animationDelay: `${index * -0.72}s`,
-                }}
-              >
-                {node.label}
-              </span>
-            ))}
+            {frame.nodes.map((node, index) => {
+              const slot = SLOTS[index];
+              if (!slot) return null;
+              return (
+                <span
+                  key={`${node.label}-${index}`}
+                  className={`frame-graph-node frame-graph-node--${node.kind}`}
+                  style={{
+                    left: `${slot.x}%`,
+                    top: `${slot.y}%`,
+                    animationDelay: `${index * -0.72}s`,
+                  }}
+                >
+                  {node.label}
+                </span>
+              );
+            })}
             <span className="frame-graph-spark frame-graph-spark--one" />
             <span className="frame-graph-spark frame-graph-spark--two" />
             <span className="frame-graph-spark frame-graph-spark--three" />

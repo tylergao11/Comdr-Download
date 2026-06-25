@@ -37,7 +37,7 @@ export const siteConfig: SiteConfig = {
     },
   ],
   advantages: [
-    { keyword: "更低", description: "单次调用仅需思考模型1/50 成本" },
+    { keyword: "更省", description: "单次调用仅需思考模型 1/50 的成本" },
     { keyword: "更强", description: "掌握专属 Cocos 资料的大模型" },
     { keyword: "更准", description: "避免噪音，上下文更干净" },
   ],

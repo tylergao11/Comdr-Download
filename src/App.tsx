@@ -1,8 +1,9 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { siteConfig } from "./site-config";
 import { FramePlayer } from "./components/FramePlayer";
 import { HeroStarfield } from "./components/HeroStarfield";
+import { lenis, isNearBottom } from "./lenis";
 
 const reveal = {
   initial: { opacity: 0, y: 28 },
@@ -34,11 +35,38 @@ export function App() {
 
 function Nav() {
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const navRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: MouseEvent | TouchEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        close();
+      }
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("touchstart", onPointer);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("touchstart", onPointer);
+    };
+  }, [open, close]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, close]);
 
   return (
-    <nav className="nav-bar">
-      <a className="brand" href="#" onClick={close}>
+    <nav className="nav-bar" ref={navRef}>
+      <a className="brand" href="/Comdr-Download/" onClick={(e) => { e.preventDefault(); close(); }}>
         <img src={`${import.meta.env.BASE_URL}comdr-icon.svg`} alt="" />
         <span>Comdr</span>
       </a>
@@ -49,7 +77,7 @@ function Nav() {
         <a className="nav-cta-mobile" href="#install" onClick={close}>开始接入</a>
       </div>
       <a className="nav-cta" href="#install">开始接入</a>
-      <button className="nav-toggle" onClick={() => setOpen(value => !value)} aria-label="菜单">
+      <button className="nav-toggle" onClick={() => setOpen(value => !value)} aria-label="菜单" aria-expanded={open}>
         <span /><span /><span />
       </button>
     </nav>
@@ -57,6 +85,21 @@ function Nav() {
 }
 
 function Hero() {
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setAtBottom(isNearBottom(80));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollDown = () => {
+    lenis.scrollTo(window.scrollY + window.innerHeight * 0.85);
+  };
+
   return (
     <section className="hero" id="graph">
       <HeroStarfield />
@@ -69,15 +112,15 @@ function Hero() {
           <a className="btn-primary" href="#workflow">观看执行流</a>
         </div>
       </div>
-      <button
-        className="scroll-indicator"
-        aria-label="向下滚动"
-        onClick={() => {
-          window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
-        }}
-      >
-        <span className="scroll-chevron" />
-      </button>
+      {!atBottom && (
+        <button
+          className="scroll-indicator"
+          aria-label="向下滚动"
+          onClick={scrollDown}
+        >
+          <span className="scroll-chevron" />
+        </button>
+      )}
     </section>
   );
 }
@@ -136,7 +179,7 @@ function DevFlowSection() {
 }
 
 function InstallSection() {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
 
   const prompt = `帮我安装 Comdr：
 1. npm install -g comdr
@@ -144,10 +187,19 @@ function InstallSection() {
 3. 在 MCP 客户端里加上 comdr server`;
 
   const copy = () => {
-    navigator.clipboard.writeText(prompt).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1400);
+    navigator.clipboard.writeText(prompt).then(
+      () => {
+        setCopyState("copied");
+        setTimeout(() => setCopyState("idle"), 1800);
+      },
+      () => {
+        setCopyState("error");
+        setTimeout(() => setCopyState("idle"), 1800);
+      },
+    );
   };
+
+  const label = copyState === "copied" ? "已复制" : copyState === "error" ? "复制失败" : "复制";
 
   return (
     <section className="install-section" id="install">
@@ -158,8 +210,8 @@ function InstallSection() {
 
       <div className="install-prompt-card">
         <pre><code>{prompt}</code></pre>
-        <button onClick={copy}>
-          {copied ? "已复制" : "复制"}
+        <button onClick={copy} aria-live="polite">
+          {label}
         </button>
       </div>
     </section>

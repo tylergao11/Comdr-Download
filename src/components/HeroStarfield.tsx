@@ -48,16 +48,16 @@ export function HeroStarfield() {
     let height = 0;
     let running = true;
 
-    // ---- IntersectionObserver: pause when not visible ----
+    // Pause rendering when less than 10% visible
     const observer = new IntersectionObserver(
       ([entry]) => {
         visibleRef.current = entry.isIntersecting;
       },
-      { threshold: 0 },
+      { threshold: 0.1 },
     );
     observer.observe(canvas);
 
-    // ---- internal helpers that recreate gradients once per resize ----
+    // Build both gradients on resize — reused across all frames
     const buildGradients = () => {
       const g = gradientRef.current;
       g.core = ctx.createRadialGradient(
@@ -72,7 +72,7 @@ export function HeroStarfield() {
       g.core.addColorStop(0.42, "rgba(82,224,207,0.040)");
       g.core.addColorStop(1, "rgba(0,0,0,0)");
 
-      g.belt = ctx.createLinearGradient(0, 0, width, height * 0.82);
+      g.belt = ctx.createLinearGradient(0, height * 0.18, width, height * 0.82);
       g.belt.addColorStop(0, "rgba(0,0,0,0)");
       g.belt.addColorStop(0.42, "rgba(181,156,255,0.060)");
       g.belt.addColorStop(0.54, "rgba(244,200,106,0.038)");
@@ -99,8 +99,8 @@ export function HeroStarfield() {
     const render = (now: number) => {
       if (!running) return;
 
+      // Skip drawing when offscreen, but keep RAF alive for re-entry
       if (!visibleRef.current) {
-        // Skip this frame — request next, no drawing
         rafRef.current = requestAnimationFrame(render);
         return;
       }
@@ -108,23 +108,16 @@ export function HeroStarfield() {
       const t = now / 1000;
       ctx.clearRect(0, 0, width, height);
 
-      // Reuse cached gradients
+      // Use cached gradients (built on resize, no per-frame allocations)
       const { core, belt } = gradientRef.current;
       if (core) {
         ctx.fillStyle = core;
         ctx.fillRect(0, 0, width, height);
       }
-
-      // Animate belt's start/end for slight movement
-      const beltTop = height * 0.18 + Math.sin(t * 0.08) * 20;
-      const beltGrad = ctx.createLinearGradient(0, beltTop, width, height * 0.82);
-      beltGrad.addColorStop(0, "rgba(0,0,0,0)");
-      beltGrad.addColorStop(0.42, "rgba(181,156,255,0.060)");
-      beltGrad.addColorStop(0.54, "rgba(244,200,106,0.038)");
-      beltGrad.addColorStop(0.70, "rgba(82,224,207,0.038)");
-      beltGrad.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = beltGrad;
-      ctx.fillRect(0, 0, width, height);
+      if (belt) {
+        ctx.fillStyle = belt;
+        ctx.fillRect(0, 0, width, height);
+      }
 
       for (const star of starsRef.current) {
         const twinkle = 0.55 + Math.sin(t * star.speed + star.phase) * 0.45;
