@@ -1,0 +1,72 @@
+{
+  "reviewer": "correctness",
+  "findings": [
+    {
+      "id": "CORRECTNESS-001",
+      "file": "c:\\Ai\\Comdr-Download\\src\\App.tsx",
+      "line": 38,
+      "severity": "high",
+      "category": "memory_leak",
+      "title": "CursorGlow animates on every mousemove without cancelling previous animations",
+      "description": "Each mousemove event calls `glow.animate()`, creating a new `Animation` object attached to the element. These animations accumulate unboundedly because they are never cancelled, removed, or replaced. With `fill: \"forwards\"`, each finished animation is retained in the element's animation list and holds a reference to its keyframe data. Over a typical session with hundreds or thousands of mousemove events, this produces a linear memory leak. The `will-change: left, top` CSS hint on the element is irrelevant here because the animation uses the Web Animations API, not CSS transitions.",
+      "evidence": "Lines 38-43: `glow.animate({ left: ..., top: ... }, { duration: 600, fill: \"forwards\", easing: \"ease-out\" })` is called on every mousemove. No previous animation is stored, cancelled, or reused. The mousemove listener is passive and the component never unmounts (it's rendered at the App root), so the leak persists for the session lifetime.",
+      "confidence": 100,
+      "fix_suggestion": "Either (a) store a ref to the previous animation and call `.cancel()` before creating a new one, or (b) set `glow.style.left` and `glow.style.top` directly instead of using the Web Animations API, which avoids allocating animation objects entirely."
+    },
+    {
+      "id": "CORRECTNESS-002",
+      "file": "c:\\Ai\\Comdr-Download\\src\\components\\MiniTerminal.tsx",
+      "line": 67,
+      "severity": "high",
+      "category": "resource_leak",
+      "title": "setInterval in typeLine is not cleaned up on unmount — interval ID is lost",
+      "description": "The `setInterval` created at line 67 stores its return value in the local variable `iv`, which is never stored in a ref or exposed outside the `typeLine` closure. There is no `useEffect` cleanup in the MiniTerminal component at all. When MiniTerminal unmounts (e.g., navigating back from flow to poem phase), the interval continues firing indefinitely because nothing holds a reference to cancel it. The `clearInterval(iv)` on line 75 only fires when the typing naturally completes, which never happens if the component unmounts mid-typing.",
+      "evidence": "Line 67: `const iv = setInterval(...)` — `iv` is local and unreachable from any cleanup. No `useEffect` exists in MiniTerminal. The component unmounts when the parent AnimatePresence removes the constellation-stage div (phase goes back to \"poem\").",
+      "confidence": 100,
+      "fix_suggestion": "Store `iv` in a ref (e.g. `intervalRef.current = iv`) and add a `useEffect` cleanup that calls `clearInterval(intervalRef.current)` and `clearTimeout(timerRef.current)` on unmount."
+    },
+    {
+      "id": "CORRECTNESS-003",
+      "file": "c:\\Ai\\Comdr-Download\\src\\components\\MiniTerminal.tsx",
+      "line": 76,
+      "severity": "medium",
+      "category": "resource_leak",
+      "title": "setTimeout callbacks not cleaned up on unmount",
+      "description": "The three `setTimeout` calls (lines 76, 97, 106) store their IDs in `timerRef.current`, but there is no cleanup mechanism when the component unmounts. If any timeout is pending when MiniTerminal unmounts, its callback will fire on the unmounted component, calling `setLines` on dead state. While React 18 suppresses the resulting state updates, the callback still executes and its enclosed closure (including `nextLine`, which recursively schedules further timeouts and intervals) continues running the entire demo pipeline to completion — wasting CPU cycles over several seconds.",
+      "evidence": "Line 76: `timerRef.current = setTimeout(callback, LINE_GAP);` and line 97/106: `timerRef.current = setTimeout(...)`. No `useEffect` return cleanup on lines 63-64 references these. The timer chain can only be stopped naturally by the demo completing.",
+      "confidence": 100,
+      "fix_suggestion": "Add a `useEffect` cleanup function that calls `clearTimeout(timerRef.current)` and `clearInterval(intervalRef.current)` when the component unmounts."
+    },
+    {
+      "id": "CORRECTNESS-004",
+      "file": "c:\\Ai\\Comdr-Download\\src\\components\\ConstellationGraph.tsx",
+      "line": 207,
+      "severity": "low",
+      "category": "visual_glitch",
+      "title": "Inline opacity on breathing rings is overridden by CSS animation keyframes",
+      "description": "The three breathing-rings circles have an inline `opacity={0.3 + p * 0.5}` intended to make them brighter as the constellation progress (p) increases. However, the `pulse-ring` CSS keyframe animation (defined in site.css line 594-597) sets `opacity` at both 0% (0.6) and 100% (0). CSS animations override inline styles in the cascade, so the inline opacity is completely invisible. The rings pulse between 0.6 and 0 regardless of progress, never reflecting the progress-based values. This is likely unintentional — the progress-based opacity was meant to take effect.",
+      "evidence": "Line 207: `opacity={0.3 + p * 0.5}` is set inline. site.css lines 594-597: `@keyframes pulse-ring { 0% { opacity: 0.6; } 100% { opacity: 0; } }` overrides it. The inline opacity has no visual effect.",
+      "confidence": 85,
+      "fix_suggestion": "Either (a) remove the inline `opacity` if the animation alone is intended, or (b) incorporate progress into the keyframe values, or (c) compute an animated opacity value in JS and pass it to `animate` via framer-motion instead of a CSS keyframe."
+    }
+  ],
+  "residual_risks": [
+    {
+      "risk": "HeroStarfield: first meteor spawns on frame 1 because `meteorTimerRef.current` initializes at 0 (line 67), causing the spawn condition on line 149 to fire immediately. The meteor starts off-screen (y: -20 to -220) so it's not jarring, but the intended delay between spawns is bypassed for the first spawn. This is a minor timing quirk, not a correctness bug."
+    },
+    {
+      "risk": "ConstellationGraph: hoveredId state is local to the component, and ConstellationGraph re-renders at 60fps driven by the parent's RAF. Each render reads hoveredId for edge pulse calculations. This is O(edges)-level work per frame (5 edges), so performance impact is negligible in this case. But if the graph grew significantly, this pattern would need optimization."
+    }
+  ],
+  "testing_gaps": [
+    {
+      "gap": "No test verifies that MiniTerminal's timers are cleaned up when the component unmounts mid-demo. A test should start a demo and then unmount the component, asserting that no intervals or timeouts remain active."
+    },
+    {
+      "gap": "No test verifies that CursorGlow does not leak animation objects after extended mouse movement. A test should measure the number of active animations on the element before and after a sequence of synthetic mousemove events."
+    },
+    {
+      "gap": "No visual regression test checks that the breathing rings' opacity correctly scales with constellation progress (currently broken by the CSS animation override)."
+    }
+  ]
+}
