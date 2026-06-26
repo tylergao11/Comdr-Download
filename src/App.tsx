@@ -14,42 +14,11 @@ export function App() {
   return (
     <>
       <HeroStarfield />
-      <CursorGlow />
       <main className="site">
         <Hero />
       </main>
     </>
   );
-}
-
-// ═════════════════════════════════════════════════════════
-//  CursorGlow — 星尘拖尾（Web Animations API，避免 React 重渲染）
-// ═════════════════════════════════════════════════════════
-
-function CursorGlow() {
-  const glowRef = useRef<HTMLDivElement>(null);
-  const prevAnimRef = useRef<Animation | null>(null);
-
-  useEffect(() => {
-    const glow = glowRef.current;
-    if (!glow) return;
-
-    const onMove = (e: MouseEvent) => {
-      prevAnimRef.current?.cancel();
-      prevAnimRef.current = glow.animate(
-        { left: `${e.clientX}px`, top: `${e.clientY}px` },
-        { duration: 600, fill: "forwards", easing: "ease-out" },
-      );
-    };
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      prevAnimRef.current?.cancel();
-    };
-  }, []);
-
-  return <div ref={glowRef} className="cursor-glow" aria-hidden="true" />;
 }
 
 // ═════════════════════════════════════════════════════════

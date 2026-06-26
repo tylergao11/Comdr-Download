@@ -617,28 +617,6 @@ section {
 }
 
 /* ═══════════════════════════════════════════
-   CursorGlow — 星尘拖尾
-   ═══════════════════════════════════════════ */
-
-.cursor-glow {
-  position: fixed;
-  z-index: 0;
-  pointer-events: none;
-  width: 120px;
-  height: 120px;
-  margin-left: -60px;
-  margin-top: -60px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(200, 215, 235, 0.06) 0%,
-    rgba(180, 200, 220, 0.03) 30%,
-    transparent 70%
-  );
-  will-change: left, top;
-}
-
-/* ═══════════════════════════════════════════
    NodeDetail — 左侧详情面板
    ═══════════════════════════════════════════ */
 
