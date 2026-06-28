@@ -660,12 +660,52 @@ section {
 }
 
 @media (max-width: 720px) {
-  .node-detail {
-    left: 12px;
-    right: 12px;
-    max-width: none;
-    bottom: 80px;
-  }
+  .site { width: min(100% - 28px, 1120px); }
+  section { padding: 64px 0; }
+  .nav-bar { top: 10px; width: calc(100% - 20px); }
+  .nav-links { position: fixed; inset: 62px 10px auto 10px; display: grid; gap: 0; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-card); background: rgba(6,9,16,.96); opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
+  .nav-links--open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-links a { padding: 13px 10px; }
+  .nav-cta { display: none; }
+  .nav-cta-mobile { display: block; padding: 13px 10px; color: var(--text-soft); font-weight: 600; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 16px; }
+  .nav-toggle { display: block; }
+  .hero { gap: 24px; min-height: 100dvh; padding: 100px 0 80px; }
+  .hero-poem { gap: 10px; }
+  .hero-poem-line { font-size: clamp(18px, 5vw, 24px); line-height: 1.5; }
+  .hero-cta-zone { flex: 1; align-items: flex-end; padding-bottom: 20px; }
+  .hero-actions { align-items: stretch; flex-direction: column; gap: 8px; margin-top: 32px; }
+  .hero-actions-sep { margin: 0; }
+  .btn-primary { font-size: 17px; letter-spacing: 0.12em; gap: 12px; width: auto; align-self: center; }
+  .btn-primary::after { width: 28px; }
+  .btn-primary:hover { gap: 16px; }
+  .btn-primary:hover::after { width: 48px; }
+  .constellation-visual { width: calc(100% - 28px); aspect-ratio: 1 / 1; }
+  .constellation-text { top: 8%; }
+  .constellation-act { font-size: clamp(16px, 4.5vw, 20px); max-width: 340px; padding: 0 16px; }
+  .constellation-brand { font-size: 10px; padding: 12px 0; }
+  .design-visual { aspect-ratio: 2 / 3; width: calc(100% - 24px); }
+  .design-narrative { top: 5%; }
+  .design-narrative-text { font-size: clamp(14px, 3.8vw, 17px); max-width: 320px; padding: 0 12px; line-height: 1.7; }
+  .design-narrative-hint { font-size: 10px; }
+  .design-brand { font-size: 10px; padding: 12px 0; }
+  .node-detail { left: 12px; right: 12px; max-width: none; bottom: 80px; }
+  .node-detail-label { font-size: 16px; }
+  .node-detail-desc { font-size: 12px; line-height: 1.7; }
+  .floating-nav { bottom: 20px; right: 16px; width: 38px; height: 38px; }
+  .floating-nav-chevron { width: 8px; height: 8px; }
+  .install-overlay { padding: 12px; align-items: flex-end; padding-bottom: 80px; }
+  .install-overlay-inner { max-width: 100%; padding: 20px 16px; gap: 14px; border-radius: 12px; }
+  .install-overlay .install-kicker { font-size: 15px; }
+  .install-tab { padding: 8px 0; }
+  .install-tab-label { font-size: 12px; }
+  .install-tab-desc { font-size: 9px; }
+  .install-ai-pre code { font-size: 11px; line-height: 1.6; }
+  .install-ai-copy { font-size: 10px; padding: 5px 12px; }
+  .install-dl-btn { font-size: 12px; padding: 10px 0; }
+  .install-step { font-size: 12px; }
+  .install-overlay .install-note { font-size: 11px; }
+  .capability-band, .advantage-band { grid-template-columns: 1fr; }
+  .advantage-item + .advantage-item { border-left: none; border-top: 1px solid var(--border); }
 }
 
 /* ═══════════════════════════════════════════
@@ -713,19 +753,6 @@ section {
 .floating-nav-chevron.up {
   transform: rotate(-135deg);
   margin-top: 4px;
-}
-
-@media (max-width: 720px) {
-  .floating-nav {
-    bottom: 20px;
-    right: 16px;
-    width: 38px;
-    height: 38px;
-  }
-  .floating-nav-chevron {
-    width: 8px;
-    height: 8px;
-  }
 }
 
 /* ═══════════════════════════════════════════
@@ -839,17 +866,6 @@ section {
 @keyframes station-breathe {
   0%, 100% { opacity: 0.55; }
   50%      { opacity: 0.95; }
-}
-
-@media (max-width: 720px) {
-  .design-visual {
-    aspect-ratio: 2 / 3;
-    width: calc(100% - 24px);
-  }
-  .design-narrative-text {
-    font-size: clamp(15px, 4vw, 18px);
-    max-width: 340px;
-  }
 }
 
 /* ═══════════════════════════════════════════
@@ -1096,19 +1112,6 @@ section {
   opacity: 0.4;
 }
 
-@media (max-width: 720px) {
-  .install-overlay {
-    padding: 16px;
-  }
-  .install-overlay-inner {
-    max-width: 100%;
-    padding: 24px 20px;
-  }
-  .install-code-block pre code {
-    font-size: 11px;
-  }
-}
-
 /* ═══════════════════════════════════════════
    Keyframes
    ═══════════════════════════════════════════ */
@@ -1123,44 +1126,4 @@ section {
   .hero { padding-top: 112px; }
   .capability-band { grid-template-columns: 1fr 1fr; }
   .constellation-visual { width: 90vw; aspect-ratio: 3 / 2; }
-}
-
-@media (max-width: 720px) {
-  .site { width: min(100% - 28px, 1120px); }
-  .nav-bar { top: 10px; width: calc(100% - 20px); }
-  .nav-links {
-    position: fixed;
-    inset: 62px 10px auto 10px;
-    display: grid; gap: 0;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    background: rgba(6, 9, 16, .96);
-    opacity: 0; transform: translateY(-8px);
-    pointer-events: none;
-    transition: opacity .18s ease, transform .18s ease;
-  }
-  .nav-links--open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-  .nav-links a { padding: 13px 10px; }
-  .nav-cta { display: none; }
-  .nav-cta-mobile {
-    display: block;
-    padding: 13px 10px;
-    color: var(--text-soft);
-    font-weight: 600;
-    border-top: 1px solid var(--border);
-    margin-top: 4px;
-    padding-top: 16px;
-  }
-  .nav-toggle { display: block; }
-  .hero { gap: 28px; min-height: auto; padding-bottom: 34px; }
-  .hero h1 { font-size: clamp(36px, 8vw, 48px); }
-  .hero-copy > p { font-size: 15px; max-width: 340px; }
-  .hero-actions { align-items: stretch; flex-direction: column; }
-  .btn-primary, .btn-secondary { width: 100%; }
-  .capability-band, .advantage-band { grid-template-columns: 1fr; }
-  .advantage-item + .advantage-item { border-left: none; border-top: 1px solid var(--border); }
-	  .constellation-visual { width: calc(100% - 28px); aspect-ratio: 1 / 1; }
-		            .constellation-act { font-size: clamp(18px, 5vw, 24px); }
-	  section { padding: 64px 0; }
 }
