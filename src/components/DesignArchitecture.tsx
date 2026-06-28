@@ -113,10 +113,10 @@ export function DesignArchitecture() {
           <motion.p
             key={activeId ?? "__default__"}
             className="design-narrative-text"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: activeId ? 0.85 : 0.6, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: activeId ? 0.85 : 0.6 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
           >
             {narrative}
           </motion.p>

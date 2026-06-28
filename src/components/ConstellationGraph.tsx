@@ -132,14 +132,14 @@ export function ConstellationGraph({
     <>
       {/* 叙事文案 */}
       <div className="constellation-text">
-        <AnimatePresence mode="sync">
+        <AnimatePresence mode="wait">
           <motion.p
             key={actIndex}
             className="constellation-act"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 0.78, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.55, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.78 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             {currentAct}
           </motion.p>

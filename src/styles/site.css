@@ -542,6 +542,9 @@ section {
 }
 
 .constellation-act {
+  position: absolute;
+  left: 0;
+  right: 0;
   text-align: center;
   font-family: var(--font-serif);
   font-size: clamp(17px, 2.4vw, 26px);
@@ -786,6 +789,7 @@ section {
 
 .design-narrative-text {
   max-width: 560px;
+  min-height: 4em;
   text-align: center;
   font-family: var(--font-serif);
   font-size: clamp(16px, 2.2vw, 22px);
