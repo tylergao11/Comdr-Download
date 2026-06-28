@@ -442,7 +442,7 @@ export function DesignArchitecture() {
 
       {/* 品牌签 */}
       <p className="design-brand">
-        Comdr · 更懂游戏开发的AI编辑器
+        Comdr · 融入你的AI工作流
       </p>
     </>
   );
