@@ -307,6 +307,7 @@ button, input { font: inherit; }
   cursor: pointer;
   transition: opacity 0.4s ease, gap 0.4s ease;
 }
+.btn-primary::before,
 .btn-primary::after {
   content: "";
   display: inline-block;
@@ -316,9 +317,11 @@ button, input { font: inherit; }
   animation: line-breathe 3s ease-in-out infinite;
   transition: width 0.4s ease, background 0.4s ease;
 }
+.btn-primary::before { animation-delay: 1.5s; }
 .btn-primary:hover {
   gap: 26px;
 }
+.btn-primary:hover::before,
 .btn-primary:hover::after {
   width: 72px;
   background: rgba(255, 255, 255, 0.55);
@@ -539,9 +542,6 @@ section {
 }
 
 .constellation-act {
-  position: absolute;
-  left: 0;
-  width: 100%;
   text-align: center;
   font-family: var(--font-serif);
   font-size: clamp(17px, 2.4vw, 26px);
@@ -669,18 +669,18 @@ section {
   .nav-cta { display: none; }
   .nav-cta-mobile { display: block; padding: 13px 10px; color: var(--text-soft); font-weight: 600; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 16px; }
   .nav-toggle { display: block; }
-  .hero { gap: 24px; min-height: 100dvh; padding: 100px 0 80px; }
+  .hero { gap: 16px; min-height: 100dvh; padding: 80px 0 60px; }
   .hero-poem { gap: 10px; }
   .hero-poem-line { font-size: clamp(18px, 5vw, 24px); line-height: 1.5; }
   .hero-cta-zone { flex: 1; align-items: flex-end; padding-bottom: 20px; }
   .hero-actions { align-items: stretch; flex-direction: column; gap: 8px; margin-top: 32px; }
   .hero-actions-sep { margin: 0; }
   .btn-primary { font-size: 17px; letter-spacing: 0.12em; gap: 12px; width: auto; align-self: center; }
-  .btn-primary::after { width: 28px; }
+  .btn-primary::before, .btn-primary::after { width: 28px; }
   .btn-primary:hover { gap: 16px; }
-  .btn-primary:hover::after { width: 48px; }
-  .constellation-visual { width: calc(100% - 28px); aspect-ratio: 1 / 1; }
-  .constellation-text { top: 8%; }
+  .btn-primary:hover::before, .btn-primary:hover::after { width: 48px; }
+  .constellation-visual { width: 100%; aspect-ratio: 1 / 1; }
+  .constellation-text { top: 4%; }
   .constellation-act { font-size: clamp(16px, 4.5vw, 20px); max-width: 340px; padding: 0 16px; }
   .constellation-brand { font-size: 10px; padding: 12px 0; }
   .design-visual { aspect-ratio: 2 / 3; width: calc(100% - 24px); }

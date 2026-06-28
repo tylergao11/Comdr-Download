@@ -51,15 +51,19 @@ export function InstallFlow() {
   const cooldownRef = useRef(false);
 
   useEffect(() => {
-    const onWheel = () => {
+    const toggle = () => {
       if (cooldownRef.current) return;
       cooldownRef.current = true;
       setVisible((v) => !v);
       setTimeout(() => { cooldownRef.current = false; }, 600);
     };
 
-    window.addEventListener("wheel", onWheel, { passive: true });
-    return () => window.removeEventListener("wheel", onWheel);
+    window.addEventListener("wheel", toggle, { passive: true });
+    window.addEventListener("touchmove", toggle, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", toggle);
+      window.removeEventListener("touchmove", toggle);
+    };
   }, []);
 
   return (
