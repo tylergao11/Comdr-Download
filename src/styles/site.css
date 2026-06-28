@@ -271,10 +271,20 @@ button, input { font: inherit; }
 /* CTA */
 .hero-actions {
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   margin-top: 44px;
-  flex-wrap: wrap;
+}
+
+.hero-actions-sep {
+  display: block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  margin: 2px 0;
 }
 
 /* ═══════════════════════════════════════════
@@ -534,12 +544,14 @@ section {
   width: 100%;
   text-align: center;
   font-family: var(--font-serif);
-  font-size: clamp(20px, 2.8vw, 30px);
-  line-height: 1.6;
-  letter-spacing: 0.12em;
+  font-size: clamp(17px, 2.4vw, 26px);
+  line-height: 1.8;
+  letter-spacing: 0.08em;
   color: var(--star-bright);
   font-weight: 300;
-  white-space: nowrap;
+  padding: 0 24px;
+  max-width: 620px;
+  margin: 0 auto;
 }
 
 .constellation-visual {
@@ -617,22 +629,33 @@ section {
 }
 
 /* ═══════════════════════════════════════════
-   NodeDetail — 左侧详情面板
+   NodeDetail — 融入深空的透明文字
+   无边框、无背景、无毛玻璃，只留文字本身
    ═══════════════════════════════════════════ */
 
 .node-detail {
   position: absolute;
   left: 32px;
-  bottom: 15%;
-  max-width: 280px;
+  bottom: 18%;
+  max-width: 300px;
   z-index: 3;
-  padding: 24px;
+  pointer-events: none;
+}
+
+.node-detail-label {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: var(--star-bright);
+  margin-bottom: 8px;
 }
 
 .node-detail-desc {
   font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.85;
+  letter-spacing: 0.02em;
   color: var(--text-soft);
 }
 
@@ -641,9 +664,7 @@ section {
     left: 12px;
     right: 12px;
     max-width: none;
-    top: auto;
     bottom: 80px;
-    transform: none;
   }
 }
 
@@ -708,6 +729,387 @@ section {
 }
 
 /* ═══════════════════════════════════════════
+   DesignArchitecture — 深空信号站 · 故事化架构叙事
+   ═══════════════════════════════════════════ */
+
+.design-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 叙事区域 ── */
+
+.design-narrative {
+  position: absolute;
+  z-index: 2;
+  top: 8%;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.design-narrative-text {
+  max-width: 560px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: clamp(16px, 2.2vw, 22px);
+  line-height: 1.8;
+  letter-spacing: 0.08em;
+  color: var(--star-bright);
+  font-weight: 300;
+  padding: 0 20px;
+}
+
+.design-narrative-hint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ── SVG 信号图 ── */
+
+.design-visual {
+  width: min(600px, calc(100% - 32px));
+  aspect-ratio: 3 / 4;
+  position: relative;
+  z-index: 1;
+}
+
+.design-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ── 信号站节点交互 ── */
+
+.design-node {
+  cursor: pointer;
+}
+.design-node:hover .design-star-core {
+  filter: drop-shadow(0 0 14px rgba(220, 235, 245, 0.8));
+}
+.design-hit {
+  cursor: pointer;
+}
+
+/* ── 品牌签 ── */
+
+.design-brand {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 18px 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(6, 9, 16, 0.6), transparent);
+}
+
+/* ── 设计页关键帧 ── */
+
+@keyframes beam-shimmer {
+  0%, 100% { opacity: 0.5; }
+  25%      { opacity: 0.85; }
+  50%      { opacity: 0.45; }
+  75%      { opacity: 0.8; }
+}
+
+@keyframes ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes station-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.95; }
+}
+
+@media (max-width: 720px) {
+  .design-visual {
+    aspect-ratio: 2 / 3;
+    width: calc(100% - 24px);
+  }
+  .design-narrative-text {
+    font-size: clamp(15px, 4vw, 18px);
+    max-width: 340px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   InstallFlow — 滚动触发浮层，不占页面空间
+   ═══════════════════════════════════════════ */
+
+.install-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(4, 7, 13, 0.35);
+}
+
+.install-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  max-width: 560px;
+  width: 100%;
+  background: rgba(6, 9, 16, 0.75);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  pointer-events: auto;
+}
+
+.install-overlay .install-kicker {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  color: var(--star-bright);
+  opacity: 0.5;
+  text-align: center;
+  margin: 0;
+}
+
+/* ── 标签栏 ── */
+.install-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.install-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.install-tab + .install-tab {
+  border-left: 1px solid var(--border);
+}
+
+.install-tab.active {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--star-bright);
+}
+
+.install-tab:hover:not(.active) {
+  color: var(--text-soft);
+}
+
+.install-tab-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.install-tab-desc {
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+/* ── 面板 ── */
+.install-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── 下载按钮 ── */
+.install-dl-btn {
+  display: block;
+  padding: 12px 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--star-bright);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.install-dl-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-hover);
+}
+
+/* ── 步骤列表 ── */
+.install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.install-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.install-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.install-step code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--star-silver);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* ── AI 一键安装块 ── */
+.install-ai-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid rgba(180, 200, 220, 0.15);
+  border-radius: 10px;
+  background: rgba(180, 200, 220, 0.03);
+}
+
+.install-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.install-ai-header span {
+  font-size: 13px;
+  color: var(--star-bright);
+  opacity: 0.7;
+}
+
+.install-ai-pre {
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0;
+  text-align: left;
+}
+
+.install-ai-pre code {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--star-silver);
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.install-ai-copy {
+  align-self: flex-end;
+  padding: 6px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--star-bright);
+  background: rgba(180, 200, 220, 0.1);
+  border: 1px solid rgba(180, 200, 220, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.install-ai-copy:hover {
+  background: rgba(180, 200, 220, 0.18);
+}
+
+/* ── 注释 + 版本 ── */
+.install-overlay .install-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  text-align: center;
+  margin: 0;
+}
+
+.install-overlay .install-note code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.install-version {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.4;
+}
+
+@media (max-width: 720px) {
+  .install-overlay {
+    padding: 16px;
+  }
+  .install-overlay-inner {
+    max-width: 100%;
+    padding: 24px 20px;
+  }
+  .install-code-block pre code {
+    font-size: 11px;
+  }
+}
+
+/* ═══════════════════════════════════════════
    Keyframes
    ═══════════════════════════════════════════ */
 
@@ -759,6 +1161,6 @@ section {
   .capability-band, .advantage-band { grid-template-columns: 1fr; }
   .advantage-item + .advantage-item { border-left: none; border-top: 1px solid var(--border); }
 	  .constellation-visual { width: calc(100% - 28px); aspect-ratio: 1 / 1; }
-	  .constellation-act { font-size: clamp(18px, 5vw, 24px); }
+		            .constellation-act { font-size: clamp(18px, 5vw, 24px); }
 	  section { padding: 64px 0; }
 }

@@ -45,9 +45,9 @@ const EDGES: ConstellationEdge[] = [
 ];
 
 const ACTS = [
-  "远处有什么在靠近",
-  "碎片开始认出彼此",
-  "它完成了。还是说，它刚刚开始？",
+  "星光横渡。每一颗星，都是一个等待唤醒的意图。",
+  "引力开始作用——意图 → 星图 → 编译 → 写入 → 审计，五颗星连成一线。",
+  "它完成了。它刚刚开始。",
 ];
 
 // ── 工具 ──
@@ -90,6 +90,7 @@ interface ConstellationGraphProps {
   progress: number;    // eased cubic，驱动视觉（星星位置、连线）
   actProgress: number; // 线性 0→1，驱动文案均匀切换
   onNodeClick: (nodeId: number) => void;
+  selectedNodeId: number | null;
 }
 
 // ═════════════════════════════════════════════════════════
@@ -100,6 +101,7 @@ export function ConstellationGraph({
   progress,
   actProgress,
   onNodeClick,
+  selectedNodeId,
 }: ConstellationGraphProps) {
   const p = Math.max(0, Math.min(1, progress));
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -232,7 +234,8 @@ export function ConstellationGraph({
                   (fromPos.x - toPos.x) ** 2 + (fromPos.y - toPos.y) ** 2,
                 ) * 1.1;
 
-              const isPulse = hoveredId === edge.from || hoveredId === edge.to;
+              const isPulse = hoveredId === edge.from || hoveredId === edge.to
+                || selectedNodeId === edge.from || selectedNodeId === edge.to;
 
               return (
                 <g key={`edge-${i}`}>

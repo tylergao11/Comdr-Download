@@ -6,6 +6,8 @@ import {
   STARS,
   type StarNode,
 } from "./components/ConstellationGraph";
+import { DesignArchitecture } from "./components/DesignArchitecture";
+import { InstallFlow } from "./components/InstallFlow";
 // ═════════════════════════════════════════════════════════
 //  App
 // ═════════════════════════════════════════════════════════
@@ -22,13 +24,13 @@ export function App() {
 }
 
 // ═════════════════════════════════════════════════════════
-//  Hero — 诗词 ⇄ 星座执行流
-//  phase: 'poem' | 'transitioning' | 'flow'
+//  Hero — 首页 ⇄ 执行流 / 设计思路
+//  phase: 'poem' | 'transitioning' | 'flow' | 'design'
 // ═════════════════════════════════════════════════════════
 
-type Phase = "poem" | "transitioning" | "flow";
+type Phase = "poem" | "transitioning" | "flow" | "design";
 
-// ── 诗词静态数据 ──
+// ── 首页静态数据 ──
 
 const POEM = [
   "星光横渡深空落入眼眸",
@@ -88,15 +90,33 @@ function Hero() {
     }, 700);
   };
 
-  // ══ 回到诗词 ══
+  // ══ 进入设计思路 ══
+
+  const handleWatchDesign = () => {
+    if (phase !== "poem") return;
+    setHasVisitedFlow(true);
+    setPhase("design");
+  };
+
+  // ══ 回到首页 ══
 
   const handleBackToPoem = () => {
-    if (phase !== "flow") return;
+    if (phase === "poem") return;
     cancelAnimationFrame(rafRef.current);
     clearTimeout(transitionTimerRef.current);
     setSelectedNodeId(null);
-    setPhase("poem"); // 直接切回，AnimatePresence 同时处理星座淡出 + 诗词淡入
+    setPhase("poem");
   };
+
+  // ══ 节点点击 ══
+
+  const handleNodeClick = (nodeId: number) => {
+    setSelectedNodeId((prev) => (prev === nodeId ? null : nodeId));
+  };
+
+  const selectedStar = selectedNodeId !== null
+    ? STARS.find((s) => s.id === selectedNodeId) ?? null
+    : null;
 
   // ══ 星座自动播放 RAF ══
 
@@ -127,23 +147,13 @@ function Hero() {
     };
   }, [phase]);
 
-  // ══ 节点点击 ══
-
-  const handleNodeClick = (nodeId: number) => {
-    setSelectedNodeId((prev) => (prev === nodeId ? null : nodeId));
-  };
-
-  const selectedStar = selectedNodeId !== null
-    ? STARS.find((s) => s.id === selectedNodeId) ?? null
-    : null;
-
   // ══════════════════════════════════════════════
   //  Render
   // ══════════════════════════════════════════════
 
   return (
     <section className="hero" id="graph">
-      {/* ── 诗词 + 按钮 ── */}
+      {/* ── 首页 + 按钮 ── */}
       <AnimatePresence>
         {phase === "poem" && (
           <motion.div
@@ -211,6 +221,13 @@ function Hero() {
                 >
                   观看执行流
                 </button>
+                <span className="hero-actions-sep" aria-hidden="true" />
+                <button
+                  className="btn-primary"
+                  onClick={handleWatchDesign}
+                >
+                  设计思路
+                </button>
               </motion.div>
             </div>
           </motion.div>
@@ -219,7 +236,7 @@ function Hero() {
 
       {/* ── 星座执行流 ── */}
       <AnimatePresence>
-        {phase !== "poem" && (
+        {(phase === "transitioning" || phase === "flow") && (
           <motion.div
             className="constellation-stage"
             key="flow-stage"
@@ -232,11 +249,25 @@ function Hero() {
               progress={flowProgress}
               actProgress={actProgress}
               onNodeClick={handleNodeClick}
+              selectedNodeId={selectedNodeId}
             />
-
-            {/* 节点详情面板 */}
             <NodeDetail star={selectedStar} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* ── 设计思路 ── */}
+      <AnimatePresence>
+        {phase === "design" && (
+          <motion.div
+            className="design-stage"
+            key="design-stage"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <DesignArchitecture />
           </motion.div>
         )}
       </AnimatePresence>
@@ -248,12 +279,14 @@ function Hero() {
         onWatchFlow={handleWatchFlow}
         onBackToPoem={handleBackToPoem}
       />
+
+      <InstallFlow />
     </section>
   );
 }
 
 // ═════════════════════════════════════════════════════════
-//  NodeDetail — 左侧详情面板
+//  NodeDetail — 融入深空的透明文字，不遮挡星座
 // ═════════════════════════════════════════════════════════
 
 function NodeDetail({ star }: { star: StarNode | null }) {
@@ -263,16 +296,24 @@ function NodeDetail({ star }: { star: StarNode | null }) {
         <motion.div
           key={star.id}
           className="node-detail"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -12 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
         >
           <motion.p
+            className="node-detail-label"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 0.55, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+          >
+            {star.label}
+          </motion.p>
+          <motion.p
             className="node-detail-desc"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.1, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 0.45, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
           >
             {star.description}
           </motion.p>
@@ -284,7 +325,7 @@ function NodeDetail({ star }: { star: StarNode | null }) {
 
 // ═════════════════════════════════════════════════════════
 //  FloatingNav — 右下角导航
-//  诗词页 ↓  执行流页 ↑
+//  首页页 ↓（→执行流）  执行流/设计思路页 ↑（→首页）
 // ═════════════════════════════════════════════════════════
 
 function FloatingNav({
@@ -299,14 +340,13 @@ function FloatingNav({
   onBackToPoem: () => void;
 }) {
   const isPoem = phase === "poem";
-  const visible = phase === "poem" || phase === "flow";
+  const navKey = isPoem ? "poem" : "sub";
   const enterDelay = isPoem ? (hasVisitedFlow ? 0.3 : 2.0) : 0.5;
 
   return (
     <AnimatePresence mode="wait">
-      {visible && (
-        <motion.button
-          key={phase}
+      <motion.button
+          key={navKey}
           className="floating-nav"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -317,11 +357,10 @@ function FloatingNav({
             ease: "easeOut",
           }}
           onClick={isPoem ? onWatchFlow : onBackToPoem}
-          aria-label={isPoem ? "观看执行流" : "返回诗词"}
+          aria-label={isPoem ? "观看执行流" : "返回首页"}
         >
           <span className={`floating-nav-chevron ${isPoem ? "down" : "up"}`} />
         </motion.button>
-      )}
     </AnimatePresence>
   );
 }
