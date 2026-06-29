@@ -280,7 +280,12 @@ function Hero() {
         onBackToPoem={handleBackToPoem}
       />
 
-      <InstallFlow />
+      <InstallFlow
+        phase={phase}
+        onWatchFlow={handleWatchFlow}
+        onWatchDesign={handleWatchDesign}
+        onBackToPoem={handleBackToPoem}
+      />
     </section>
   );
 }

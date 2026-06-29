@@ -28,13 +28,15 @@ function InstallPrompt() {
 
   return (
     <div className="install-ai-block">
-      <div className="install-ai-header">
-        <span>复制给 AI</span>
-      </div>
-      <pre className="install-ai-pre"><code>{AI_PROMPT}</code></pre>
       <button className="install-ai-copy" onClick={handle} type="button">
-        {localCopied ? "✓ 已复制" : "复制"}
+        {localCopied ? "✓ 已复制" : "点击复制"}
       </button>
+      <div className="install-ai-pre">
+        <code>{AI_PROMPT}</code>
+      </div>
+      <p className="install-note">
+        支持 Claude、Codex 及任意 MCP 兼容的 AI 客户端。
+      </p>
     </div>
   );
 }
@@ -45,10 +47,30 @@ const TABS: { key: Tab; label: string; desc: string }[] = [
   { key: "view", label: "View", desc: "桌面星图" },
 ];
 
-export function InstallFlow() {
+export function InstallFlow({
+  phase,
+  onWatchFlow,
+  onWatchDesign,
+  onBackToPoem,
+}: {
+  phase: string;
+  onWatchFlow: () => void;
+  onWatchDesign: () => void;
+  onBackToPoem: () => void;
+}) {
   const [visible, setVisible] = useState(false);
   const [tab, setTab] = useState<Tab>("cli");
   const cooldownRef = useRef(false);
+
+  const handleClose = () => setVisible(false);
+  const handleNav = (fn: () => void) => {
+    setVisible(false);
+    fn();
+  };
+
+  const isPoem = phase === "poem";
+  const isFlow = phase === "flow";
+  const isDesign = phase === "design";
 
   useEffect(() => {
     const toggle = () => {
@@ -76,7 +98,17 @@ export function InstallFlow() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <div className="install-overlay-inner">
+          <div
+            className="install-overlay-inner"
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            <button
+              className="install-close"
+              onClick={handleClose}
+              type="button"
+              aria-label="关闭"
+            />
             <p className="install-kicker">开始使用</p>
 
             {/* ── 标签栏 ── */}
@@ -187,6 +219,25 @@ export function InstallFlow() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* ── 底部导航 ── */}
+            <div className="install-nav">
+              {!isPoem && (
+                <button className="install-nav-btn" onClick={() => handleNav(onBackToPoem)} type="button">
+                  首页
+                </button>
+              )}
+              {!isFlow && (
+                <button className="install-nav-btn" onClick={() => handleNav(onWatchFlow)} type="button">
+                  优势
+                </button>
+              )}
+              {!isDesign && (
+                <button className="install-nav-btn" onClick={() => handleNav(onWatchDesign)} type="button">
+                  执行流
+                </button>
+              )}
+            </div>
 
             {/* ── 底部版本号 ── */}
             <p className="install-version">v{VERSION}</p>

@@ -49,21 +49,21 @@ const LINES: TransmissionLine[] = [
 
 // ── 故事叙事 ──
 
-const DEFAULT_NARRATIVE = "一个意图从深空坠落，穿越六道信号站，最终抵达编辑器里的一行精确操作。";
+const DEFAULT_NARRATIVE = "一个意图从深空坠落，穿越六道信号站，最终抵达编辑器里的一行精确操作";
 
 const NODE_NARRATIVES: Record<string, string> = {
   cli:
-    "「MCP 入口」——它不挑来客。Claude、Codex、任意 LLM 只需一句自然语言，剩下的交给 Comdr。标准协议，零绑定。",
+    "「MCP 入口」——它不挑来客。Claude、Codex、任意 LLM 只需一句自然语言，剩下的交给 Comdr。标准协议,零绑定",
   engine:
-    "「核心引擎」——Commander 将意图编译为 DSL 指令，Gateway 以五阶段管线编排执行。熔断器在暗处沉默守护，连环错误自动熔断。",
+    "「核心引擎」——Commander 将意图编译为 DSL 指令,Gateway 以五阶段管线编排执行。知识库及时补足,熔断器暗处守护",
   hypergraph:
-    "「项目星图」——全量扫描磁盘，七种边类型编织节点、Prefab、脚本与资源的引用之网。你问「谁引用了这个 Prefab」，它早已知道答案。",
+    "「项目星图」——全量扫描磁盘,七种边类型编织节点、Prefab、脚本与资源的引用之网。你问「谁引用了这个 Prefab」,它早已知道答案",
   bridge:
-    "「编辑器扩展」——在 Cocos Creator 进程内沉默运行。原子写入不留半成品，快照回滚随时可退。每一次操作，全链路可追溯。",
+    "「编辑器扩展」——在 Cocos Creator 进程内沉默运行。原子写入不留半成品，快照回滚随时可退。每一次操作,全链路可追溯",
   foundation:
-    "「共享基础」——全系统唯一真相源。类型、常量、组件目录、AST 解析，所有包的类型契约在此定义，从一而终。",
+    "「共享基础」——全系统唯一真相源。类型、常量、组件目录、AST 解析，所有包的类型契约在此定义,从一而终",
   view:
-    "「桌面应用」——Tauri + React + PixiJS 构筑的独立窗口。实时注视 Agent 的每一次心跳：引用网络、事件时间线、LLM 输出与缓存命缺。",
+    "「桌面应用」——在星空中遨游。实时注视 Agent 的每一次心跳:引用网络、事件时间线、LLM 输出与缓存命缺",
 };
 
 // ── 设计信条（侧边注释） ──
@@ -283,7 +283,7 @@ export function DesignArchitecture() {
                 <circle
                   cx={station.x}
                   cy={station.y}
-                  r={14}
+                  r={16}
                   fill="transparent"
                   className="design-hit"
                 />
@@ -377,7 +377,7 @@ export function DesignArchitecture() {
                   textAnchor="middle"
                   fill={isActive ? "rgba(210,220,235,0.75)" : "rgba(160,170,190,0.45)"}
                   fontFamily="var(--font-mono, monospace)"
-                  fontSize="2.6"
+                  fontSize="3.2"
                   letterSpacing="0.05em"
                   style={{
                     pointerEvents: "none",
@@ -393,7 +393,7 @@ export function DesignArchitecture() {
                   textAnchor="middle"
                   fill={isActive ? "rgba(180,190,210,0.45)" : "rgba(140,150,170,0.25)"}
                   fontFamily="var(--font-sans, sans-serif)"
-                  fontSize="1.7"
+                  fontSize="2.2"
                   letterSpacing="0.03em"
                   style={{
                     pointerEvents: "none",
@@ -415,7 +415,7 @@ export function DesignArchitecture() {
               textAnchor={credo.x < 50 ? "start" : "end"}
               fill="rgba(180,190,210,0.22)"
               fontFamily="var(--font-serif, serif)"
-              fontSize="2.4"
+              fontSize="3.0"
               letterSpacing="0.06em"
               style={{ pointerEvents: "none" }}
             >
@@ -442,7 +442,7 @@ export function DesignArchitecture() {
 
       {/* 品牌签 */}
       <p className="design-brand">
-        Comdr · 融入你的AI工作流
+        Comdr · 指挥官，欢迎你
       </p>
     </>
   );

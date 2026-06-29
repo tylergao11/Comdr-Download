@@ -694,8 +694,8 @@ section {
   .node-detail { left: 12px; right: 12px; max-width: none; bottom: 80px; }
   .node-detail-label { font-size: 16px; }
   .node-detail-desc { font-size: 12px; line-height: 1.7; }
-  .floating-nav { bottom: 20px; right: 16px; width: 38px; height: 38px; }
-  .floating-nav-chevron { width: 8px; height: 8px; }
+  .floating-nav { bottom: 20px; right: 16px; width: 44px; height: 44px; }
+  .floating-nav-chevron { width: 10px; height: 10px; }
   .install-overlay { padding: 12px; align-items: flex-end; padding-bottom: 80px; }
   .install-overlay-inner { max-width: 100%; padding: 20px 16px; gap: 14px; border-radius: 12px; }
   .install-overlay .install-kicker { font-size: 15px; }
@@ -703,10 +703,18 @@ section {
   .install-tab-label { font-size: 12px; }
   .install-tab-desc { font-size: 9px; }
   .install-ai-pre code { font-size: 11px; line-height: 1.6; }
-  .install-ai-copy { font-size: 10px; padding: 5px 12px; }
+  .install-ai-copy { font-size: 12px; padding: 10px 0; }
+  .install-panel { height: auto; min-height: 200px; }
   .install-dl-btn { font-size: 12px; padding: 10px 0; }
   .install-step { font-size: 12px; }
   .install-overlay .install-note { font-size: 11px; }
+  .install-nav { gap: 20px; }
+  .install-nav-btn { font-size: 13px; }
+  .install-nav-btn::before,
+  .install-nav-btn::after { width: 16px; }
+  .install-nav-btn:hover { gap: 16px; }
+  .install-nav-btn:hover::before,
+  .install-nav-btn:hover::after { width: 28px; }
   .capability-band, .advantage-band { grid-template-columns: 1fr; }
   .advantage-item + .advantage-item { border-left: none; border-top: 1px solid var(--border); }
 }
@@ -885,24 +893,55 @@ section {
   justify-content: center;
   padding: 40px;
   pointer-events: none;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(4, 7, 13, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(4, 7, 13, 0.12);
 }
 
 .install-overlay-inner {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 18px;
   max-width: 560px;
+  max-height: 480px;
+  overflow-y: auto;
   width: 100%;
-  background: rgba(6, 9, 16, 0.75);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(200,215,235,0.08) 0%, transparent 50%),
+    rgba(6, 9, 16, 0.4);
+  border: none;
+  border-radius: 20px;
   padding: 32px;
   pointer-events: auto;
 }
+
+.install-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+.install-close::before,
+.install-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 1px;
+  background: var(--star-bright);
+}
+.install-close::before { transform: translate(-50%, -50%) rotate(45deg); }
+.install-close::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+.install-close:hover { opacity: 0.7; }
 
 .install-overlay .install-kicker {
   font-family: var(--font-serif);
@@ -918,13 +957,14 @@ section {
 .install-tabs {
   display: flex;
   gap: 0;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 8px;
-  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .install-tab {
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -934,16 +974,25 @@ section {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
-.install-tab + .install-tab {
-  border-left: 1px solid var(--border);
+.install-tab + .install-tab::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(200, 215, 235, 0.15);
 }
 
 .install-tab.active {
-  background: rgba(255, 255, 255, 0.04);
+  background: transparent;
   color: var(--star-bright);
+  box-shadow: inset 0 -1.5px 0 rgba(200, 215, 235, 0.4);
 }
 
 .install-tab:hover:not(.active) {
@@ -967,26 +1016,30 @@ section {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  height: 200px;
 }
 
-/* ── 下载按钮 ── */
-.install-dl-btn {
+/* ── 下载按钮 / 复制按钮 ── */
+.install-dl-btn,
+.install-ai-copy {
   display: block;
   padding: 12px 0;
   text-align: center;
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--star-bright);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.07);
+  border: none;
   border-radius: 8px;
-  text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
+.install-dl-btn { text-decoration: none; }
 
-.install-dl-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--border-hover);
+.install-dl-btn:hover,
+.install-ai-copy:hover {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 20px rgba(200, 215, 235, 0.06);
 }
 
 /* ── 步骤列表 ── */
@@ -1013,11 +1066,11 @@ section {
   height: 20px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--text-muted);
+  color: var(--text-soft);
 }
 
 .install-step code {
@@ -1033,61 +1086,47 @@ section {
 .install-ai-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 18px;
-  border: 1px solid rgba(180, 200, 220, 0.15);
-  border-radius: 10px;
-  background: rgba(180, 200, 220, 0.03);
-}
-
-.install-ai-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.install-ai-header span {
-  font-size: 13px;
-  color: var(--star-bright);
-  opacity: 0.7;
+  gap: 14px;
 }
 
 .install-ai-pre {
   padding: 14px 16px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
   border-radius: 8px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
   overflow-x: auto;
+  overflow-y: hidden;
   margin: 0;
   text-align: left;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180,200,220,0.12) transparent;
+}
+.install-ai-pre::-webkit-scrollbar {
+  height: 4px;
+}
+.install-ai-pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+.install-ai-pre::-webkit-scrollbar-thumb {
+  background: rgba(180,200,220,0.12);
+  border-radius: 2px;
+}
+.install-ai-pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(180,200,220,0.2);
 }
 
 .install-ai-pre code {
   padding: 0;
   background: none;
   border: none;
-  font-size: 13px;
-  line-height: 1.8;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 2;
   color: var(--star-silver);
   text-align: left;
-  white-space: pre-wrap;
-}
-
-.install-ai-copy {
-  align-self: flex-end;
-  padding: 6px 16px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--star-bright);
-  background: rgba(180, 200, 220, 0.1);
-  border: 1px solid rgba(180, 200, 220, 0.2);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.install-ai-copy:hover {
-  background: rgba(180, 200, 220, 0.18);
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(200, 215, 235, 0.08);
 }
 
 /* ── 注释 + 版本 ── */
@@ -1106,6 +1145,51 @@ section {
   background: rgba(255, 255, 255, 0.04);
   padding: 1px 5px;
   border-radius: 3px;
+}
+
+.install-nav {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: center;
+}
+.install-nav-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--star-silver);
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.3s ease, gap 0.3s ease;
+}
+.install-nav-btn::before,
+.install-nav-btn::after {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: rgba(200, 215, 235, 0.25);
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.install-nav-btn:hover {
+  opacity: 0.9;
+  gap: 20px;
+  background: none;
+  color: var(--star-bright);
+  box-shadow: none;
+}
+.install-nav-btn:hover::before,
+.install-nav-btn:hover::after {
+  width: 40px;
+  background: rgba(200, 215, 235, 0.45);
 }
 
 .install-version {
@@ -1130,4 +1214,32 @@ section {
   .hero { padding-top: 112px; }
   .capability-band { grid-template-columns: 1fr 1fr; }
   .constellation-visual { width: 90vw; aspect-ratio: 3 / 2; }
+}
+
+/* ── 平板断点 721-979px ── */
+@media (max-width: 979px) and (min-width: 721px) {
+  .constellation-visual { width: 85vw; max-width: 560px; }
+  .design-visual { width: min(480px, 80vw); }
+  .node-detail { bottom: 12px; }
+  .node-detail-label { font-size: 18px; }
+  .node-detail-desc { font-size: 13px; }
+}
+
+/* ── 无障碍：减少动画 ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .hero-starfield canvas {
+    display: none;
+  }
+}
+
+/* ── 触摸优化 ── */
+button, .install-tab, .constellation-node, .design-node {
+  touch-action: manipulation;
 }
