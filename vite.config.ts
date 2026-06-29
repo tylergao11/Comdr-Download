@@ -14,7 +14,7 @@ const VERSION = (() => {
 })();
 
 export default defineConfig({
-  base: "/Comdr-Download/",
+  base: "./",
   define: {
     __APP_VERSION__: JSON.stringify(VERSION),
   },
