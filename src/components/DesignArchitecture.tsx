@@ -442,7 +442,7 @@ export function DesignArchitecture() {
 
       {/* 品牌签 */}
       <p className="design-brand">
-        Comdr · 指挥官，欢迎你
+        Comdr · 热爱驱动开发
       </p>
     </>
   );

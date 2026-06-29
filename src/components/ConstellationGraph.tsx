@@ -123,9 +123,9 @@ export function ConstellationGraph({
   const edgeOpacity =
     p < 0.33 ? 0 : p < 0.5 ? ((p - 0.33) / 0.17) * 0.4 : 0.4;
 
-  const particlesVisible = p >= 0.55;
+  const particlesVisible = isComplete; // 只在动画完成后显示，避免 animateMotion path 每帧变化导致粒子重置
   const centerGlowOpacity = 0.06 + p * 0.25;
-  const edgeDashProgress = Math.max(0, Math.min(1, (p - 0.33) / 0.17));
+  const edgeDashProgress = p; // 连线与星星同步绘制，同一条 easing 曲线
 
   return (
     <>
@@ -218,7 +218,7 @@ export function ConstellationGraph({
           ))}
 
           {/* ══ 全部内容组 — 完成态微动 ══ */}
-          <g className={isComplete ? "constellation-drift" : ""}>
+          <g className={`constellation-drift${isComplete ? " drift-active" : ""}`}>
 
           {/* ══ 连线 — 星光轨迹 ══ */}
           <g opacity={edgeOpacity}>
@@ -405,7 +405,7 @@ export function ConstellationGraph({
 
       {/* 浮动品牌签 */}
       <p className="constellation-brand">
-        Comdr · 指挥官，欢迎你
+        Comdr · 热爱驱动开发
       </p>
     </>
   );

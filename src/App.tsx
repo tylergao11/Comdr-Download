@@ -141,16 +141,16 @@ function Hero() {
   useEffect(() => {
     if (phase !== "flow") return;
 
+    // 动画一开始就默认选中第一颗星，底下立刻出文字
+    setSelectedNodeId(0);
+
     const DURATION = 6000;
     flowStartRef.current = performance.now();
 
     const tick = (now: number) => {
       const elapsed = now - flowStartRef.current;
       const raw = Math.min(1, elapsed / DURATION);
-      const t =
-        raw < 0.5
-          ? 4 * raw * raw * raw
-          : 1 - Math.pow(-2 * raw + 2, 3) / 2;
+      const t = 1 - Math.pow(1 - raw, 3); // easeOut cubic — 开头快结尾慢，无死区
       setFlowProgress(t);
       setActProgress(raw); // 线性进度，驱动文案均匀切换
       if (raw < 1) {

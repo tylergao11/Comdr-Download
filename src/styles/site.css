@@ -594,7 +594,12 @@ section {
 .constellation-drift {
   transform-origin: 50% 50%;
   transform-box: fill-box;
+  will-change: transform;
   animation: constellation-drift 24s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.constellation-drift.drift-active {
+  animation-play-state: running;
 }
 
 @keyframes constellation-drift {
