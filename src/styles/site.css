@@ -704,7 +704,7 @@ section {
   .install-tab-desc { font-size: 9px; }
   .install-ai-pre code { font-size: 11px; line-height: 1.6; }
   .install-ai-copy { font-size: 12px; padding: 10px 0; }
-  .install-panel { height: auto; min-height: 200px; }
+  .install-panel { min-height: 0; }
   .install-dl-btn { font-size: 12px; padding: 10px 0; }
   .install-step { font-size: 12px; }
   .install-overlay .install-note { font-size: 11px; }
@@ -1016,7 +1016,6 @@ section {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  height: 200px;
 }
 
 /* ── 下载按钮 / 复制按钮 ── */
@@ -1145,6 +1144,17 @@ section {
   background: rgba(255, 255, 255, 0.04);
   padding: 1px 5px;
   border-radius: 3px;
+}
+
+.install-footer {
+  margin: auto 0 0;
+  padding-top: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  opacity: 0.45;
+  line-height: 1.6;
 }
 
 .install-nav {

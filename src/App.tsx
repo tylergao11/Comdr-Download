@@ -76,13 +76,19 @@ function Hero() {
   const rafRef = useRef(0);
   const flowStartRef = useRef(0);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout>>(0);
+  const carouselRef = useRef<ReturnType<typeof setInterval>>(0);
+  const manualRef = useRef(false);
 
   // ══ 进入执行流 ══
 
   const handleWatchFlow = () => {
-    if (phase !== "poem") return;
+    cancelAnimationFrame(rafRef.current);
+    clearTimeout(transitionTimerRef.current);
+    clearInterval(carouselRef.current);
+    manualRef.current = false;
+    setSelectedNodeId(null);
     setFlowProgress(0);
-    setActProgress(0); // 文案也从零开始
+    setActProgress(0);
     setHasVisitedFlow(true);
     setPhase("transitioning");
     transitionTimerRef.current = setTimeout(() => {
@@ -93,7 +99,9 @@ function Hero() {
   // ══ 进入设计思路 ══
 
   const handleWatchDesign = () => {
-    if (phase !== "poem") return;
+    cancelAnimationFrame(rafRef.current);
+    clearTimeout(transitionTimerRef.current);
+    setSelectedNodeId(null);
     setHasVisitedFlow(true);
     setPhase("design");
   };
@@ -111,7 +119,17 @@ function Hero() {
   // ══ 节点点击 ══
 
   const handleNodeClick = (nodeId: number) => {
-    setSelectedNodeId((prev) => (prev === nodeId ? null : nodeId));
+    setSelectedNodeId((prev) => {
+      if (prev === nodeId) {
+        // 取消选中 → 恢复自动轮播，立即跳到下一颗星
+        manualRef.current = false;
+        return (nodeId + 1) % STARS.length;
+      } else {
+        // 手动选中 → 暂停轮播
+        manualRef.current = true;
+        return nodeId;
+      }
+    });
   };
 
   const selectedStar = selectedNodeId !== null
@@ -123,7 +141,7 @@ function Hero() {
   useEffect(() => {
     if (phase !== "flow") return;
 
-    const DURATION = 10000;
+    const DURATION = 6000;
     flowStartRef.current = performance.now();
 
     const tick = (now: number) => {
@@ -146,6 +164,32 @@ function Hero() {
       clearTimeout(transitionTimerRef.current);
     };
   }, [phase]);
+
+  // ══ 完成态自动轮播 ══
+
+  const isFlowComplete = flowProgress >= 1;
+
+  useEffect(() => {
+    if (phase !== "flow" || !isFlowComplete) {
+      clearInterval(carouselRef.current);
+      return;
+    }
+
+    // 首次完成：自动选中第一颗星
+    if (selectedNodeId === null && !manualRef.current) {
+      setSelectedNodeId(0);
+    }
+
+    carouselRef.current = setInterval(() => {
+      if (manualRef.current) return;
+      setSelectedNodeId((prev) => {
+        if (prev === null) return 0;
+        return (prev + 1) % STARS.length;
+      });
+    }, 8000);
+
+    return () => clearInterval(carouselRef.current);
+  }, [phase, isFlowComplete]); // selectedNodeId 故意不列入 deps，interval 内用 functional updater
 
   // ══════════════════════════════════════════════
   //  Render

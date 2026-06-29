@@ -26,11 +26,11 @@ interface ConstellationEdge {
 const STAR_MAP = new Map<number, StarNode>();
 
 export const STARS: StarNode[] = [
-  { id: 0, label: "收敛", description: "两百多个原子操作散落在 Cocos 编辑器深处。对 LLM 而言，每多一条岔路，出错概率就翻一倍。Comdr 将它们收敛为五个 MCP 工具。不多，不少，刚好够用。", finalX: 50, finalY: 14, scatterX: 38, scatterY: 24 },
-  { id: 1, label: "星图", description: "一个 Prefab 被哪些脚本引用。一个节点依赖了谁。一段修改会牵出怎样的连锁反应。这些关系从来都在，只是散落在目录和文件名里。星图把它们捞出来，画成一张能读的网。", finalX: 14, finalY: 44, scatterX: 82, scatterY: 18 },
-  { id: 2, label: "语义", description: "新增技能、批量调整属性、重构组件引用——过去你要读懂 Cocos API，手写每一行操作序列。现在你只描述意图，引擎理解语义，把事做完。每一次调用，准确如一。", finalX: 86, finalY: 44, scatterX: 16, scatterY: 72 },
-  { id: 3, label: "稳定", description: "几百次操作，每一次都有快照。几千行变更，每一步都能回滚。它不会留半成品在磁盘上，不会在你最忙的下午让你回去排错。将稳定做到极致，会得到什么——一名真正的开发伙伴。", finalX: 28, finalY: 82, scatterX: 72, scatterY: 80 },
-  { id: 4, label: "轻盈", description: "上下文窗口是模型调用中最贵的带宽。Comdr 只携带必要的，把每一段上下文用在刀刃上。同样的任务，50 倍的成本差距。轻盈不是减配，是知道什么不需要。", finalX: 72, finalY: 82, scatterX: 26, scatterY: 52 },
+  { id: 0, label: "收敛", description: "两百多个原子操作散落在 Cocos 编辑器深处。工具越多，LLM 的选择负担越重。Comdr 只暴露四个 MCP 工具——不多，不少，刚好够用。LLM 无需在选择中权衡，只需描述意图，引擎接管剩下的一切。", finalX: 50, finalY: 14, scatterX: 38, scatterY: 24 },
+  { id: 1, label: "星图", description: "一个 Prefab 被哪些脚本调用。改一行代码会牵出怎样的连锁反应。Comdr 全量扫描磁盘，七种边类型编织引用网络——trace 追踪依赖链，look 看清出边，who 查清入边。LLM 不盲写，先看懂项目，再做决策。", finalX: 14, finalY: 44, scatterX: 82, scatterY: 18 },
+  { id: 2, label: "语义", description: "传统做法通过 Cocos API 逐行操作对象。Comdr 绕过这一层，直接在 Prefab 与 Scene 的 JSON 层面读写——五阶段管线 compile→enrich→build→serialize→clean，一气呵成。没有 API 寻址开销，没有中间态偏差，每一次操作直抵数据结构本身。", finalX: 86, finalY: 44, scatterX: 16, scatterY: 72 },
+  { id: 3, label: "稳定", description: "十三条 DSL 指令，四类操作。封装的边界就是稳定的边界。LLM 不需要学 Cocos API，不需要记属性名、参数顺序、边界情况——每条指令内置默认值、错误处理、回滚机制。零学习成本，零记忆负担，极其稳定。", finalX: 28, finalY: 82, scatterX: 72, scatterY: 80 },
+  { id: 4, label: "轻盈", description: "上下文窗口是 LLM 调用中最贵的带宽。检索探针以 depth / detail / focus 三级精度控制每次输出的信息量：结构骨架还是完整属性，单层还是全展开。上下文以 diff 形式追加，快照替换而非历史膨胀。同样的任务，五十倍成本差距。轻盈不是减配，是精确地知道什么不需要。", finalX: 72, finalY: 82, scatterX: 26, scatterY: 52 },
 ];
 
 // 初始化快速查找 Map
@@ -46,7 +46,7 @@ const EDGES: ConstellationEdge[] = [
 
 const ACTS = [
   "不止如此",
-  "想要更多",
+  "能够更多",
 ];
 
 // ── 工具 ──

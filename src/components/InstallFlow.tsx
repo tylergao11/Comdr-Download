@@ -29,17 +29,17 @@ function InstallPrompt() {
   return (
     <div className="install-ai-block">
       <button className="install-ai-copy" onClick={handle} type="button">
-        {localCopied ? "✓ 已复制" : "点击复制"}
+        {localCopied ? "✓ 已复制 — 粘贴给 AI 即可安装" : "点击复制 — 粘贴给 AI 一键安装"}
       </button>
-      <div className="install-ai-pre">
-        <code>{AI_PROMPT}</code>
-      </div>
-      <p className="install-note">
-        支持 Claude、Codex 及任意 MCP 兼容的 AI 客户端。
-      </p>
     </div>
   );
 }
+
+const TAB_DESC: Record<Tab, string> = {
+  cli: "支持 Claude、Codex 及任意 MCP 兼容的 AI 客户端。",
+  bridge: "Bridge 是 Comdr 与 Cocos Creator 之间的桥梁，负责接收 CLI 指令并在编辑器内执行节点操作。",
+  view: "View 是 Comdr 的桌面可视化前端，通过星图实时展示项目结构、资源引用和 AI 执行轨迹。",
+};
 
 const TABS: { key: Tab; label: string; desc: string }[] = [
   { key: "cli", label: "AI", desc: "一键安装" },
@@ -173,10 +173,6 @@ export function InstallFlow({
                     </div>
                   </div>
 
-                  <p className="install-note">
-                    Bridge 是 Comdr 与 Cocos Creator 之间的桥梁，
-                    负责接收 CLI 指令并在编辑器内执行节点操作。
-                  </p>
                 </motion.div>
               )}
 
@@ -212,12 +208,22 @@ export function InstallFlow({
                     </div>
                   </div>
 
-                  <p className="install-note">
-                    View 是 Comdr 的桌面可视化前端，
-                    通过星图实时展示项目结构、资源引用和 AI 执行轨迹。
-                  </p>
                 </motion.div>
               )}
+            </AnimatePresence>
+
+            {/* ── 底部描述 ── */}
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={tab}
+                className="install-footer"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {TAB_DESC[tab]}
+              </motion.p>
             </AnimatePresence>
 
             {/* ── 底部导航 ── */}
@@ -239,8 +245,6 @@ export function InstallFlow({
               )}
             </div>
 
-            {/* ── 底部版本号 ── */}
-            <p className="install-version">v{VERSION}</p>
           </div>
         </motion.div>
       )}
