@@ -24,7 +24,7 @@ export function App() {
 }
 
 // ═════════════════════════════════════════════════════════
-//  Hero — 首页 ⇄ 执行流 / 设计思路
+//  Hero — 首页 ⇄ 我的优势 / 观看执行流
 //  phase: 'poem' | 'transitioning' | 'flow' | 'design'
 // ═════════════════════════════════════════════════════════
 
@@ -33,9 +33,9 @@ type Phase = "poem" | "transitioning" | "flow" | "design";
 // ── 首页静态数据 ──
 
 const POEM = [
-  "星光横渡深空落入眼眸",
-  "数据穿行总线汇聚一团",
-  "真实亦或虚幻",
+  "星光横渡深空难觅影踪",
+  "数据穿行总线落入眼眸",
+  "真实亦或虚构",
 ];
 
 const charVariants = {
@@ -219,14 +219,14 @@ function Hero() {
                   className="btn-primary"
                   onClick={handleWatchFlow}
                 >
-                  观看执行流
+                  我的优势
                 </button>
                 <span className="hero-actions-sep" aria-hidden="true" />
                 <button
                   className="btn-primary"
                   onClick={handleWatchDesign}
                 >
-                  设计思路
+                  观看执行流
                 </button>
               </motion.div>
             </div>
@@ -325,7 +325,7 @@ function NodeDetail({ star }: { star: StarNode | null }) {
 
 // ═════════════════════════════════════════════════════════
 //  FloatingNav — 右下角导航
-//  首页页 ↓（→执行流）  执行流/设计思路页 ↑（→首页）
+//  首页页 ↓（→观看执行流）  执行流/设计思路页 ↑（→首页）
 // ═════════════════════════════════════════════════════════
 
 function FloatingNav({

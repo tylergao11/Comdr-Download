@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 /* ═════════════════════════════════════════════════════════
-   ConstellationGraph — 深空星座执行流 SVG
+   ConstellationGraph — Comdr 五大优势
    星空主题：银白光点、径向渐变辉光、星尘微粒、星光轨迹
    ═════════════════════════════════════════════════════════ */
 
@@ -26,11 +26,11 @@ interface ConstellationEdge {
 const STAR_MAP = new Map<number, StarNode>();
 
 export const STARS: StarNode[] = [
-  { id: 0, label: "意图", description: "用自然语言描述你想做的事——新增技能、重构系统、跨文件查找引用。Comdr 理解你的意图，拆解为可执行的步骤。", finalX: 50, finalY: 14, scatterX: 38, scatterY: 24 },
-  { id: 1, label: "星图", description: "Comdr 把 Cocos Creator 项目解析成可搜索、可追踪的星图。节点、Prefab、脚本、资源之间的真实关系一目了然。", finalX: 14, finalY: 44, scatterX: 82, scatterY: 18 },
-  { id: 2, label: "编译", description: "意图被编译成精确的编辑器操作序列——创建节点、修改属性、调整引用。每一步都可预览、可撤销。", finalX: 86, finalY: 44, scatterX: 16, scatterY: 72 },
-  { id: 3, label: "写入", description: "确认后的操作批量写入项目文件。支持 dry-run 预演，改动范围透明可控。", finalX: 28, finalY: 82, scatterX: 72, scatterY: 80 },
-  { id: 4, label: "审计", description: "每次修改留下完整审计轨迹。谁改了什么、为什么改、影响范围——全链路可追溯、可回滚。", finalX: 72, finalY: 82, scatterX: 26, scatterY: 52 },
+  { id: 0, label: "收敛", description: "两百多个原子操作，对 LLM 来说是一座迷宫。Comdr 把它们收敛为五个 MCP 工具，让每个角色都专注自己所擅长的。", finalX: 50, finalY: 14, scatterX: 38, scatterY: 24 },
+  { id: 1, label: "星图", description: "项目里任何一种引用关系都有迹可循。节点依赖了谁、Prefab 被哪些脚本引用、某段代码会触发什么连锁反应——星图会给你答案。", finalX: 14, finalY: 44, scatterX: 82, scatterY: 18 },
+  { id: 2, label: "语义", description: "自然语言操作编辑器。新增技能、批量调整属性、重构组件引用——无需懂 Cocos API，无需手写操作序列。你给出需求，引擎完成剩余一切。", finalX: 86, finalY: 44, scatterX: 16, scatterY: 72 },
+  { id: 3, label: "稳定", description: "将稳定做到极致，会得到什么。一名真正的开发伙伴。", finalX: 28, finalY: 82, scatterX: 72, scatterY: 80 },
+  { id: 4, label: "轻盈", description: "精简的上下文包袱，聪明的执行。会带来 50 倍的成本优势。", finalX: 72, finalY: 82, scatterX: 26, scatterY: 52 },
 ];
 
 // 初始化快速查找 Map
@@ -45,9 +45,8 @@ const EDGES: ConstellationEdge[] = [
 ];
 
 const ACTS = [
-  "星光横渡。每一颗星，都是一个等待唤醒的意图。",
-  "引力开始作用——意图 → 星图 → 编译 → 写入 → 审计，五颗星连成一线。",
-  "它完成了。它刚刚开始。",
+  "你，需要什么",
+  "将 Comdr 融入你的开发工作流。",
 ];
 
 // ── 工具 ──
@@ -110,8 +109,8 @@ export function ConstellationGraph({
   // ── 派生值 ──
 
   const actRaw = Math.max(0, Math.min(1, actProgress));
-  const actStep = actRaw * 3;
-  const actIndex = Math.min(2, Math.max(0, Math.floor(actStep)));
+  const actStep = actRaw * ACTS.length;
+  const actIndex = Math.min(ACTS.length - 1, Math.max(0, Math.floor(actStep)));
   const currentAct = ACTS[actIndex] ?? ACTS[0];
 
   const starOpacity =
