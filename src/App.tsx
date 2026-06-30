@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { HeroStarfield } from "./components/HeroStarfield";
 import {
@@ -8,14 +8,21 @@ import {
 } from "./components/ConstellationGraph";
 import { DesignArchitecture } from "./components/DesignArchitecture";
 import { InstallFlow } from "./components/InstallFlow";
-// ═════════════════════════════════════════════════════════
-//  App
-// ═════════════════════════════════════════════════════════
+
+/* ═══════════════════════════════════════════════════════════════════
+   App
+   ═══════════════════════════════════════════════════════════════════ */
 
 export function App() {
   return (
     <>
+      {/* ══ 背景层 ══ */}
       <HeroStarfield />
+
+
+      {/* ══ 光标辉光 — 直接跟随 ══ */}
+      <CursorGlow />
+
       <main className="site">
         <Hero />
       </main>
@@ -23,14 +30,80 @@ export function App() {
   );
 }
 
-// ═════════════════════════════════════════════════════════
-//  Hero — 首页 ⇄ 我的优势 / 观看执行流
-//  phase: 'poem' | 'transitioning' | 'flow' | 'design'
-// ═════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
+   CursorGlow — 光标驱动的柔和辉光
+   直接跟随鼠标，不做百分比换算，避免锚点漂移
+   ═══════════════════════════════════════════════════════════════════ */
+
+function CursorGlow() {
+  const ref = useRef<HTMLDivElement>(null);
+  const activeRef = useRef(false);
+  const rafRef = useRef(0);
+  const targetRef = useRef({ x: -200, y: -200 });
+  const sizeRef = useRef({ w: 380, h: 260 });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // 触屏设备无光标，直接跳过，不启动 RAF
+    if (!window.matchMedia("(hover: hover)").matches) return;
+
+    // 缓存元素尺寸，只在 resize 时更新，避免每帧 getBoundingClientRect 重排
+    const updateSize = () => {
+      const rect = el.getBoundingClientRect();
+      sizeRef.current = { w: rect.width, h: rect.height };
+    };
+    updateSize();
+
+    const onMove = (e: MouseEvent) => {
+      targetRef.current = { x: e.clientX, y: e.clientY };
+      if (!activeRef.current) {
+        activeRef.current = true;
+        el.classList.add("cursor-glow--active");
+      }
+    };
+
+    const onLeave = () => {
+      activeRef.current = false;
+      el.classList.remove("cursor-glow--active");
+    };
+
+    let currentX = -200;
+    let currentY = -200;
+
+    const tick = () => {
+      const { w, h } = sizeRef.current;
+      const tx = targetRef.current.x - w / 2;
+      const ty = targetRef.current.y - h / 2;
+      currentX += (tx - currentX) * 0.12;
+      currentY += (ty - currentY) * 0.12;
+      el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
+    window.addEventListener("resize", updateSize);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("resize", updateSize);
+    };
+  }, []);
+
+  return <div ref={ref} className="cursor-glow" aria-hidden="true" />;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Hero — 首页 ⇄ 星座执行流 ⇄ 设计思路
+   phase: 'poem' | 'transitioning' | 'flow' | 'design'
+   ═══════════════════════════════════════════════════════════════════ */
 
 type Phase = "poem" | "transitioning" | "flow" | "design";
-
-// ── 首页静态数据 ──
 
 const POEM = [
   "星光横渡深空难觅影踪",
@@ -70,7 +143,7 @@ const poemVariants = {
 function Hero() {
   const [phase, setPhase] = useState<Phase>("poem");
   const [flowProgress, setFlowProgress] = useState(0);
-  const [actProgress, setActProgress] = useState(0); // 线性，驱动文案切换
+  const [actProgress, setActProgress] = useState(0);
   const [hasVisitedFlow, setHasVisitedFlow] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const rafRef = useRef(0);
@@ -81,7 +154,7 @@ function Hero() {
 
   // ══ 进入执行流 ══
 
-  const handleWatchFlow = () => {
+  const handleWatchFlow = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
     clearTimeout(transitionTimerRef.current);
     clearInterval(carouselRef.current);
@@ -94,54 +167,51 @@ function Hero() {
     transitionTimerRef.current = setTimeout(() => {
       setPhase("flow");
     }, 700);
-  };
+  }, []);
 
   // ══ 进入设计思路 ══
 
-  const handleWatchDesign = () => {
+  const handleWatchDesign = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
     clearTimeout(transitionTimerRef.current);
     setSelectedNodeId(null);
     setHasVisitedFlow(true);
     setPhase("design");
-  };
+  }, []);
 
   // ══ 回到首页 ══
 
-  const handleBackToPoem = () => {
+  const handleBackToPoem = useCallback(() => {
     if (phase === "poem") return;
     cancelAnimationFrame(rafRef.current);
     clearTimeout(transitionTimerRef.current);
     setSelectedNodeId(null);
     setPhase("poem");
-  };
+  }, [phase]);
 
   // ══ 节点点击 ══
 
-  const handleNodeClick = (nodeId: number) => {
+  const handleNodeClick = useCallback((nodeId: number) => {
     setSelectedNodeId((prev) => {
       if (prev === nodeId) {
-        // 取消选中 → 恢复自动轮播，立即跳到下一颗星
         manualRef.current = false;
         return (nodeId + 1) % STARS.length;
       } else {
-        // 手动选中 → 暂停轮播
         manualRef.current = true;
         return nodeId;
       }
     });
-  };
+  }, []);
 
   const selectedStar = selectedNodeId !== null
     ? STARS.find((s) => s.id === selectedNodeId) ?? null
     : null;
 
-  // ══ 星座自动播放 RAF ══
+  // ══ 星座动画 RAF ══
 
   useEffect(() => {
     if (phase !== "flow") return;
 
-    // 动画一开始就默认选中第一颗星，底下立刻出文字
     setSelectedNodeId(0);
 
     const DURATION = 6000;
@@ -150,9 +220,9 @@ function Hero() {
     const tick = (now: number) => {
       const elapsed = now - flowStartRef.current;
       const raw = Math.min(1, elapsed / DURATION);
-      const t = 1 - Math.pow(1 - raw, 3); // easeOut cubic — 开头快结尾慢，无死区
+      const t = 1 - Math.pow(1 - raw, 3);
       setFlowProgress(t);
-      setActProgress(raw); // 线性进度，驱动文案均匀切换
+      setActProgress(raw);
       if (raw < 1) {
         rafRef.current = requestAnimationFrame(tick);
       }
@@ -175,7 +245,6 @@ function Hero() {
       return;
     }
 
-    // 首次完成：自动选中第一颗星
     if (selectedNodeId === null && !manualRef.current) {
       setSelectedNodeId(0);
     }
@@ -189,7 +258,7 @@ function Hero() {
     }, 8000);
 
     return () => clearInterval(carouselRef.current);
-  }, [phase, isFlowComplete]); // selectedNodeId 故意不列入 deps，interval 内用 functional updater
+  }, [phase, isFlowComplete]);
 
   // ══════════════════════════════════════════════
   //  Render
@@ -197,7 +266,7 @@ function Hero() {
 
   return (
     <section className="hero" id="graph">
-      {/* ── 首页 + 按钮 ── */}
+      {/* ── 首页诗 + 按钮 ── */}
       <AnimatePresence>
         {phase === "poem" && (
           <motion.div
@@ -259,21 +328,18 @@ function Hero() {
                   ease: "easeOut" as const,
                 }}
               >
-                <button
-                  className="btn-primary"
-                  onClick={handleWatchFlow}
-                >
+                <button className="btn-primary" onClick={handleWatchFlow}>
                   我的优势
                 </button>
                 <span className="hero-actions-sep" aria-hidden="true" />
-                <button
-                  className="btn-primary"
-                  onClick={handleWatchDesign}
-                >
+                <button className="btn-primary" onClick={handleWatchDesign}>
                   观看执行流
                 </button>
               </motion.div>
             </div>
+
+            {/* 滚动指示器 */}
+            <ScrollIndicator />
           </motion.div>
         )}
       </AnimatePresence>
@@ -334,9 +400,22 @@ function Hero() {
   );
 }
 
-// ═════════════════════════════════════════════════════════
-//  NodeDetail — 融入深空的透明文字，不遮挡星座
-// ═════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
+   ScrollIndicator — 底部滚轮提示（仅首页可见）
+   ═══════════════════════════════════════════════════════════════════ */
+
+function ScrollIndicator() {
+  return (
+    <div className="scroll-indicator" aria-hidden="true">
+      <div className="scroll-indicator__line" />
+      <span className="scroll-indicator__text">向下滚动</span>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NodeDetail — 融入深空的透明文字
+   ═══════════════════════════════════════════════════════════════════ */
 
 function NodeDetail({ star }: { star: StarNode | null }) {
   return (
@@ -372,10 +451,9 @@ function NodeDetail({ star }: { star: StarNode | null }) {
   );
 }
 
-// ═════════════════════════════════════════════════════════
-//  FloatingNav — 右下角导航
-//  首页页 ↓（→观看执行流）  执行流/设计思路页 ↑（→首页）
-// ═════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
+   FloatingNav — 右下角导航
+   ═══════════════════════════════════════════════════════════════════ */
 
 function FloatingNav({
   phase,
@@ -395,21 +473,21 @@ function FloatingNav({
   return (
     <AnimatePresence mode="wait">
       <motion.button
-          key={navKey}
-          className="floating-nav"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{
-            duration: 0.3,
-            delay: enterDelay,
-            ease: "easeOut",
-          }}
-          onClick={isPoem ? onWatchFlow : onBackToPoem}
-          aria-label={isPoem ? "观看执行流" : "返回首页"}
-        >
-          <span className={`floating-nav-chevron ${isPoem ? "down" : "up"}`} />
-        </motion.button>
+        key={navKey}
+        className="floating-nav"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        transition={{
+          duration: 0.3,
+          delay: enterDelay,
+          ease: "easeOut",
+        }}
+        onClick={isPoem ? onWatchFlow : onBackToPoem}
+        aria-label={isPoem ? "观看执行流" : "返回首页"}
+      >
+        <span className={`floating-nav-chevron ${isPoem ? "down" : "up"}`} />
+      </motion.button>
     </AnimatePresence>
   );
 }

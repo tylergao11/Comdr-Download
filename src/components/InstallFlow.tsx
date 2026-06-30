@@ -75,19 +75,38 @@ export function InstallFlow({
   };
 
   useEffect(() => {
-    const toggle = () => {
+    // 滚动/滑动触发浮层
+    const onWheel = () => {
       if (cooldownRef.current) return;
       cooldownRef.current = true;
       setVisible((v) => !v);
-      setTimeout(() => {
-        cooldownRef.current = false;
-      }, 600);
+      setTimeout(() => { cooldownRef.current = false; }, 600);
     };
-    window.addEventListener("wheel", toggle, { passive: true });
-    window.addEventListener("touchmove", toggle, { passive: true });
+
+    // touchmove：加位移阈值，避免 tap 关闭按钮时微小手抖误触发
+    let touchStartY = 0;
+    const TOUCH_THRESHOLD = 14; // px，小于此距离视为 tap，不触发
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? 0;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (cooldownRef.current) return;
+      const dy = Math.abs((e.touches[0]?.clientY ?? 0) - touchStartY);
+      if (dy < TOUCH_THRESHOLD) return;
+      cooldownRef.current = true;
+      setVisible((v) => !v);
+      setTimeout(() => { cooldownRef.current = false; }, 600);
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
     return () => {
-      window.removeEventListener("wheel", toggle);
-      window.removeEventListener("touchmove", toggle);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
     };
   }, []);
 

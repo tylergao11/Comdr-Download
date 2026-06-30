@@ -325,7 +325,7 @@ export function DesignArchitecture() {
                   opacity={isActive ? 0.7 : 0.35}
                   style={{
                     pointerEvents: "none",
-                    transition: "opacity 0.4s ease, r 0.4s ease",
+                    transition: "opacity 0.4s ease",
                   }}
                 />
 
@@ -348,12 +348,12 @@ export function DesignArchitecture() {
                 <circle
                   cx={station.x}
                   cy={station.y}
-                  r={isEngine ? 1.6 : (coreR * 0.2)}
+                  r={isEngine ? 1.6 : Math.max(0.8, coreR * 0.25)}
                   fill="#ffffff"
                   opacity={isActive ? 1 : 0.75}
                   style={{
                     pointerEvents: "none",
-                    transition: "opacity 0.3s ease, r 0.3s ease",
+                    transition: "opacity 0.3s ease",
                   }}
                 />
 
@@ -442,7 +442,7 @@ export function DesignArchitecture() {
 
       {/* 品牌签 */}
       <p className="design-brand">
-        Comdr · 热爱驱动开发
+        Comdr · 感受真实的世界
       </p>
     </>
   );

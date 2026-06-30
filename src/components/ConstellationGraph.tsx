@@ -405,7 +405,7 @@ export function ConstellationGraph({
 
       {/* 浮动品牌签 */}
       <p className="constellation-brand">
-        Comdr · 热爱驱动开发
+        Comdr · 感受真实的世界
       </p>
     </>
   );
