@@ -11,7 +11,30 @@ type Tab = "cli" | "bridge" | "view";
 
 const VERSION = __APP_VERSION__;
 
-const AI_PROMPT = `请帮我安装 Comdr（CLI+Bridge+View+MCP 全部搞定）：运行 npm install -g @tylergao11/comdr；Bridge：mkdir -p extensions && curl -L -o extensions/comdr-bridge.zip https://tylergao11.com/download/comdr-bridge-v${VERSION}.zip && unzip -o extensions/comdr-bridge.zip -d extensions/ && rm extensions/comdr-bridge.zip，然后重启 Cocos Creator；View：curl -L -o comdr-view.zip https://tylergao11.com/download/comdr-view-v${VERSION}.zip && unzip -o comdr-view.zip && rm comdr-view.zip；MCP 配置添加 {"mcpServers":{"comdr":{"command":"npx","args":["-y","@tylergao11/comdr"]}}}，重启 AI 客户端。`;
+const AI_PROMPT = `请帮我安装 Comdr（CLI+Bridge+View+MCP 全部搞定）：
+
+1. CLI：npm install -g @tylergao11/comdr
+
+2. Bridge（Cocos Creator 扩展）：
+   mkdir -p extensions
+   curl -L -o extensions/comdr-bridge.zip https://a3da6dbb.comdr-download.pages.dev/download/comdr-bridge-v${VERSION}.zip
+   unzip -o extensions/comdr-bridge.zip -d extensions/
+   rm extensions/comdr-bridge.zip
+   然后重启 Cocos Creator
+
+3. View（桌面星图）：
+   curl -L -o comdr-view.zip https://a3da6dbb.comdr-download.pages.dev/download/comdr-view-v${VERSION}.zip
+   unzip -o comdr-view.zip
+   rm comdr-view.zip
+
+4. MCP：在 ~/.claude/.mcp.json 添加：
+   {
+     "comdr": {
+       "command": "npx",
+       "args": ["-y", "@tylergao11/comdr"]
+     }
+   }
+   重启 AI 客户端。`;
 
 function InstallPrompt() {
   const [localCopied, setLocalCopied] = useState(false);
