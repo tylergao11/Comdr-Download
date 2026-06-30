@@ -1086,7 +1086,7 @@ section {
   border-radius: 3px;
 }
 
-/* ── AI 一键安装块 ── */
+/* ── AI 安装说明块 ── */
 .install-ai-block {
   display: flex;
   flex-direction: column;

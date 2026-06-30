@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-type Tab = "cli" | "bridge" | "view";
+type Tab = "view" | "bridge" | "mcp";
 
 const VERSION = __APP_VERSION__;
+const VIEW_SETUP_FILE = `comdr-view-setup-v${VERSION}.exe`;
+const BRIDGE_FILE = `comdr-bridge-v${VERSION}.zip`;
 
 const AI_PROMPT = [
-  "请帮我安装 Comdr：",
+  "请按新的 Comdr View 工作区流程安装 Comdr：",
   "",
-  "1. npm install -g @tylergao11/comdr",
+  `1. 下载并运行 Comdr View 安装包：download/${VIEW_SETUP_FILE}`,
   "",
-  "2. comdr install --project \"项目路径\"",
+  "2. 打开 Comdr View，在启动页选择 Cocos Creator 项目根目录作为工作区。",
   "",
-  "3. 重启 Cocos Creator。",
+  "3. 在 Comdr View 内点击安装/更新 Bridge，把 Bridge 同步到当前工作区。",
+  "",
+  "4. 完全关闭并重新打开 Cocos Creator，然后回到 Comdr View 进入星图。",
+  "",
+  "可选 MCP：npm install -g @tylergao11/comdr。comdr-run 默认读取 Comdr View 当前工作区，无需每次传项目路径。",
 ].join("\n");
 
 function InstallPrompt() {
@@ -29,22 +35,22 @@ function InstallPrompt() {
   return (
     <div className="install-ai-block">
       <button className="install-ai-copy" onClick={handle} type="button">
-        {localCopied ? "✓ 已复制 — 粘贴给 AI 即可安装" : "点击复制 — 粘贴给 AI 一键安装"}
+        {localCopied ? "已复制给 AI" : "复制给 AI 的安装说明"}
       </button>
     </div>
   );
 }
 
 const TAB_DESC: Record<Tab, string> = {
-  cli: "安装 CLI 后运行 comdr install --project \"项目路径\"，自动下载 Bridge + View 并完成所有配置。",
-  bridge: "comdr install 自动下载 Bridge 到项目的 extensions/ 目录。重启 Cocos Creator 后生效。",
-  view: "comdr install 自动将 comdr-view.exe 放到项目根目录。",
+  view: "Comdr View 是新的唯一入口：选择工作区、同步 Bridge、查看星图和驱动 MCP 都从这里开始。",
+  bridge: "Bridge 不再由下载页或 CLI 单独分发到项目根目录，优先通过 Comdr View 安装到当前工作区。",
+  mcp: "CLI/MCP 只负责外部 AI 接入；comdr-run 默认读取 Comdr View 当前工作区，显式项目路径仅用于无界面场景。",
 };
 
 const TABS: { key: Tab; label: string; desc: string }[] = [
-  { key: "cli", label: "一键安装", desc: "comdr install" },
-  { key: "bridge", label: "Bridge", desc: "自动安装到项目" },
-  { key: "view", label: "View", desc: "项目内启动" },
+  { key: "view", label: "Comdr View", desc: "先选工作区" },
+  { key: "bridge", label: "Bridge", desc: "View 内同步" },
+  { key: "mcp", label: "MCP", desc: "可选高级" },
 ];
 
 export function InstallFlow({
@@ -59,18 +65,23 @@ export function InstallFlow({
   onBackToPoem: () => void;
 }) {
   const [visible, setVisible] = useState(false);
-  const [tab, setTab] = useState<Tab>("cli");
+  const [tab, setTab] = useState<Tab>("view");
   const cooldownRef = useRef(false);
 
   const handleClose = () => setVisible(false);
-  const handleNav = (fn: () => void) => { setVisible(false); fn(); };
+  const handleNav = (fn: () => void) => {
+    setVisible(false);
+    fn();
+  };
 
   useEffect(() => {
     const toggle = () => {
       if (cooldownRef.current) return;
       cooldownRef.current = true;
       setVisible((v) => !v);
-      setTimeout(() => { cooldownRef.current = false; }, 600);
+      setTimeout(() => {
+        cooldownRef.current = false;
+      }, 600);
     };
     window.addEventListener("wheel", toggle, { passive: true });
     window.addEventListener("touchmove", toggle, { passive: true });
@@ -90,7 +101,8 @@ export function InstallFlow({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <div className="install-overlay-inner"
+          <div
+            className="install-overlay-inner"
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
           >
@@ -99,8 +111,12 @@ export function InstallFlow({
 
             <div className="install-tabs">
               {TABS.map((t) => (
-                <button key={t.key} className={`install-tab ${tab === t.key ? "active" : ""}`}
-                  onClick={() => setTab(t.key)} type="button">
+                <button
+                  key={t.key}
+                  className={`install-tab ${tab === t.key ? "active" : ""}`}
+                  onClick={() => setTab(t.key)}
+                  type="button"
+                >
                   <span className="install-tab-label">{t.label}</span>
                   <span className="install-tab-desc">{t.desc}</span>
                 </button>
@@ -108,57 +124,118 @@ export function InstallFlow({
             </div>
 
             <AnimatePresence mode="wait">
-              {tab === "cli" && (
-                <motion.div key="cli" className="install-panel"
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
+              {tab === "view" && (
+                <motion.div
+                  key="view"
+                  className="install-panel"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <a className="install-dl-btn" href={`download/${VIEW_SETUP_FILE}`} download>
+                    下载 Comdr View v{VERSION}
+                  </a>
+                  <div className="install-steps">
+                    <div className="install-step">
+                      <span className="install-step-num">1</span>
+                      <span>运行安装包并打开 Comdr View</span>
+                    </div>
+                    <div className="install-step">
+                      <span className="install-step-num">2</span>
+                      <span>在启动页选择 Cocos Creator 项目根目录</span>
+                    </div>
+                    <div className="install-step">
+                      <span className="install-step-num">3</span>
+                      <span>在 View 内安装/更新 Bridge，再重启 Cocos Creator</span>
+                    </div>
+                  </div>
                   <InstallPrompt />
                 </motion.div>
               )}
 
               {tab === "bridge" && (
-                <motion.div key="bridge" className="install-panel"
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
+                <motion.div
+                  key="bridge"
+                  className="install-panel"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25 }}
+                >
                   <div className="install-steps">
-                    <div className="install-step"><span className="install-step-num">1</span>
-                      <span>自动下载并解压到 <code>extensions/comdr-cocos-bridge/</code></span></div>
-                    <div className="install-step"><span className="install-step-num">2</span>
-                      <span>自动写入 <code>.mcp.json</code></span></div>
-                    <div className="install-step"><span className="install-step-num">3</span>
-                      <span>重启 Cocos Creator</span></div>
+                    <div className="install-step">
+                      <span className="install-step-num">1</span>
+                      <span>先在 Comdr View 选择工作区</span>
+                    </div>
+                    <div className="install-step">
+                      <span className="install-step-num">2</span>
+                      <span>点击安装/更新 Bridge，同步到 <code>extensions/comdr-cocos-bridge/</code></span>
+                    </div>
+                    <div className="install-step">
+                      <span className="install-step-num">3</span>
+                      <span>独立 Bridge 包：<a href={`download/${BRIDGE_FILE}`} download>{BRIDGE_FILE}</a></span>
+                    </div>
                   </div>
                 </motion.div>
               )}
 
-              {tab === "view" && (
-                <motion.div key="view" className="install-panel"
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
+              {tab === "mcp" && (
+                <motion.div
+                  key="mcp"
+                  className="install-panel"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25 }}
+                >
                   <div className="install-steps">
-                    <div className="install-step"><span className="install-step-num">1</span>
-                      <span>自动放到项目根目录</span></div>
-                    <div className="install-step"><span className="install-step-num">2</span>
-                      <span>自动发现当前项目并读取星图缓存</span></div>
-                    <div className="install-step"><span className="install-step-num">3</span>
-                      <span>无需配置，开箱即用</span></div>
+                    <div className="install-step">
+                      <span className="install-step-num">1</span>
+                      <span>需要外部 AI 接入时安装 <code>npm install -g @tylergao11/comdr</code></span>
+                    </div>
+                    <div className="install-step">
+                      <span className="install-step-num">2</span>
+                      <span>MCP 使用 <code>comdr</code> 启动，<code>comdr-run</code> 自动读取 View 当前工作区</span>
+                    </div>
+                    <div className="install-step">
+                      <span className="install-step-num">3</span>
+                      <span>无界面或 CI 场景才显式传入项目路径</span>
+                    </div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
             <AnimatePresence mode="wait">
-              <motion.p key={tab} className="install-footer"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <motion.p
+                key={tab}
+                className="install-footer"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
                 {TAB_DESC[tab]}
               </motion.p>
             </AnimatePresence>
 
             <div className="install-nav">
-              {phase !== "poem" && <button className="install-nav-btn" onClick={() => handleNav(onBackToPoem)}>首页</button>}
-              {phase !== "flow" && <button className="install-nav-btn" onClick={() => handleNav(onWatchFlow)}>优势</button>}
-              {phase !== "design" && <button className="install-nav-btn" onClick={() => handleNav(onWatchDesign)}>执行流</button>}
+              {phase !== "poem" && (
+                <button className="install-nav-btn" onClick={() => handleNav(onBackToPoem)}>
+                  首页
+                </button>
+              )}
+              {phase !== "flow" && (
+                <button className="install-nav-btn" onClick={() => handleNav(onWatchFlow)}>
+                  优势
+                </button>
+              )}
+              {phase !== "design" && (
+                <button className="install-nav-btn" onClick={() => handleNav(onWatchDesign)}>
+                  执行流
+                </button>
+              )}
             </div>
           </div>
         </motion.div>
