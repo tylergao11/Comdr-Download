@@ -18,7 +18,7 @@ const AI_PROMPT = [
   "",
   "4. 完全关闭并重新打开 Cocos Creator，然后回到 Comdr View 进入星图。",
   "",
-  "可选 MCP：npm install -g @tylergao11/comdr。comdr-run 默认读取 Comdr View 当前工作区，无需每次传项目路径。",
+  "可选 MCP：npm install -g @tylergao11/comdr。comdr-run 默认读取 Comdr View 当前工作区；projectPath 只用于校验是否一致，不能切换工作区。",
 ].join("\n");
 
 function InstallPrompt() {
@@ -44,7 +44,7 @@ function InstallPrompt() {
 const TAB_DESC: Record<Tab, string> = {
   view: "Comdr View 是新的唯一入口：选择工作区、同步 Bridge、查看星图和驱动 MCP 都从这里开始。",
   bridge: "Bridge 不再由下载页或 CLI 单独分发到项目根目录，优先通过 Comdr View 安装到当前工作区。",
-  mcp: "CLI/MCP 只负责外部 AI 接入；comdr-run 默认读取 Comdr View 当前工作区，显式项目路径仅用于无界面场景。",
+  mcp: "CLI/MCP 只负责外部 AI 接入；comdr-run 默认读取 Comdr View 当前工作区，显式项目路径只做一致性校验。",
 };
 
 const TABS: { key: Tab; label: string; desc: string }[] = [
@@ -200,7 +200,7 @@ export function InstallFlow({
                     </div>
                     <div className="install-step">
                       <span className="install-step-num">3</span>
-                      <span>无界面或 CI 场景才显式传入项目路径</span>
+                      <span>projectPath 只做一致性校验；切换项目请回到 Comdr View 选择工作区</span>
                     </div>
                   </div>
                 </motion.div>
